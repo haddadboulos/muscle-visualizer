@@ -187,9 +187,7 @@
                         <div id="day-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                     <span id="day-progress-text" class="text-[11px] font-semibold text-slate-600 tabular-nums">0/0</span>
-                    <button id="timer-pill-btn" title="Tap to start/pause workout timer" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 tabular-nums transition-colors">
-                        00:00
-                    </button>
+                    <span id="last-session-badge" class="hidden px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap"></span>
                     <button id="heatmap-btn" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors">
                         Day Map
                     </button>
@@ -266,23 +264,31 @@
             <div id="finish-day-label" class="text-xs font-bold uppercase tracking-wider text-emerald-600 mt-4">Workout Complete</div>
             <h2 id="finish-title" class="text-xl font-extrabold text-slate-900 mt-1">Great Session!</h2>
             <p class="text-xs text-slate-500 mt-1">Your weight logs are saved for next session.</p>
-            <div class="grid grid-cols-3 gap-2 mt-4">
-                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-                    <div class="text-[10px] font-bold uppercase text-slate-400">Time</div>
-                    <div id="finish-time" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">00:00</div>
-                </div>
+            <div class="grid grid-cols-2 gap-2 mt-4">
                 <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                     <div class="text-[10px] font-bold uppercase text-slate-400">Steps</div>
                     <div id="finish-steps" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">0/0</div>
                 </div>
                 <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-                    <div class="text-[10px] font-bold uppercase text-slate-400">Logged</div>
-                    <div id="finish-logged" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">0</div>
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Weights Logged</div>
+                    <div id="finish-logged" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">0/0</div>
                 </div>
             </div>
-            <div class="mt-5 space-y-2">
+            <div class="mt-3 p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-left">
+                <div class="flex items-center justify-between">
+                    <label for="finish-minutes-input" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Apple Watch Time (min)</label>
+                    <span id="finish-last-time" class="text-[10px] font-semibold text-emerald-700"></span>
+                </div>
+                <div class="mt-1.5 flex items-center gap-1.5">
+                    <button type="button" onclick="adjustFinishMin(-5)" class="px-2.5 py-2 rounded-xl bg-white border border-emerald-200 text-xs font-bold text-slate-700 hover:bg-slate-50">-5</button>
+                    <input id="finish-minutes-input" type="number" inputmode="numeric" value="45" placeholder="45"
+                        class="w-full px-3 py-2 rounded-xl border border-emerald-200 bg-white text-sm font-extrabold text-slate-900 text-center">
+                    <button type="button" onclick="adjustFinishMin(5)" class="px-2.5 py-2 rounded-xl bg-white border border-emerald-200 text-xs font-bold text-slate-700 hover:bg-slate-50">+5</button>
+                </div>
+            </div>
+            <div class="mt-4 space-y-2">
                 <button id="finish-clear-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors">
-                    Clear Steps for Next Time
+                    Save Time &amp; Clear Steps for Next Time
                 </button>
                 <button id="finish-keep-btn" class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
                     Keep Current View
@@ -318,8 +324,8 @@
                     <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200">
                         <div class="text-xs font-bold uppercase tracking-wider text-blue-700 mb-1.5">Kept &amp; Reordered</div>
                         <ul class="space-y-1.5 text-xs text-slate-700">
-                            <li><strong>Goblet Squat moved to #1 (Wed):</strong> Previously done at #12 after legs were already fatigued.</li>
-                            <li><strong>Abduction / Adduction moved to end (Wed):</strong> Stops pre-fatiguing your hip stabilizers before squats.</li>
+                            <li><strong>Leg Press moved to #1 (Wed):</strong> Replaces late-workout Goblet Squats so you lift heavy legs while fresh.</li>
+                            <li><strong>Abduction &amp; Adduction moved to end (Wed):</strong> Kept as separate machines at the end instead of pre-fatiguing hips first.</li>
                             <li><strong>Kept favorites:</strong> Pull-ups/Chin-ups, Seated Row, Lying Leg Curl, Leg Extension, Calf Raise, Glute Kickback, DB Curls, Tricep Machine, Rope Crunch, Captain's Chair.</li>
                         </ul>
                     </div>
@@ -661,28 +667,28 @@
             wed: {
                 badge: 'Day 2 • Wednesday',
                 title: 'Lower A — Quads, Glutes & Hips',
-                subtitle: 'Moves Goblet Squat from #12 to #1 when fresh; keeps all your leg & hip machines.',
+                subtitle: 'Starts fresh with Leg Press at #1; keeps Glute Kickback, Leg Extension, Lying Curl, Abduction, and Adduction separate.',
                 steps: [
                     {
                         id: 'wed-1',
-                        name: 'Goblet Squat (or Hack Squat / Leg Press)',
+                        name: 'Leg Press Machine',
                         tag: 'Reordered to #1', tagStyle: 'bg-purple-100 text-purple-700',
-                        equipment: 'Dumbbell / Machine',
+                        equipment: 'Leg Press Machine',
                         sets: '3 sets × 8–12 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['quads', 'glute_maximus'],
-                        secondary: ['adductors', 'abs', 'erector_spinae'],
+                        secondary: ['adductors'],
                         camera: 'front',
-                        why: 'You used to do Goblet Squats at #12 after pre-exhausting hips and legs. Doing them #1 lets you lift heavier and burn far more energy.',
-                        machineSetup: 'Hold a heavy dumbbell vertically tight against your upper chest, feet shoulder-width, toes turned slightly out.',
+                        why: 'Replaces late-workout Goblet Squats at #1 while your legs are fresh, letting you load heavy quads & glutes safely without lower-back fatigue.',
+                        machineSetup: 'Place feet shoulder-width around the middle of the sled, toes slightly out, and set safety stops before starting.',
                         formCues: [
-                            'Brace your core, push knees out over toes, and sit down until thighs are at least parallel.',
-                            'Keep chest tall and elbows tucked inside your knees at the bottom.',
-                            'Drive smoothly through your whole foot back to standing.'
+                            'Lower the sled under control until knees bend deep without your lower back peeling off the pad.',
+                            'Push evenly through your whole foot (midfoot + heel) without slamming knees locked at the top.',
+                            'Keep knees tracking straight over your toes.'
                         ],
-                        mistake: 'Letting the dumbbell pull your torso forward or cutting depth shallow.',
+                        mistake: 'Letting your tailbone curl up off the seat at the bottom or bouncing out of the stops.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'goblet squat proper form'
+                        searchQuery: 'leg press machine proper form'
                     },
                     {
                         id: 'wed-2',
@@ -749,27 +755,46 @@
                     },
                     {
                         id: 'wed-5',
-                        name: 'Hip Abduction + Hip Adduction (Superset)',
+                        name: 'Hip Abduction Machine',
                         tag: 'Reordered to End', tagStyle: 'bg-purple-100 text-purple-700',
-                        equipment: 'Hip Machines',
-                        sets: '2 sets × 12–15 each',
+                        equipment: 'Abduction Machine',
+                        sets: '2 sets × 12–15 reps',
                         effort: '1 RIR • 60s rest',
-                        primary: ['glute_medius', 'adductors'],
+                        primary: ['glute_medius'],
                         secondary: ['glute_maximus'],
                         camera: 'front',
-                        why: 'Kept both hip machines you like, moved from #1 to the end so you do not fatigue squat stabilizers before lifting.',
-                        machineSetup: 'Sit upright (or lean slightly forward on abduction to bias glute medius). Move smoothly without slamming pads.',
+                        why: 'Kept from your old routine and moved from #1 to the end so you do not pre-fatigue hip stabilizers before Leg Press.',
+                        machineSetup: 'Sit upright (or lean slightly forward to bias upper glutes) with outer thighs against the pads.',
                         formCues: [
-                            'Push knees apart (abduction) with a 1-second pause at peak contraction.',
-                            'Control the return smoothly instead of letting plates clank.',
-                            'Pair immediately with adduction (squeezing thighs together slowly).'
+                            'Push knees apart smoothly and hold 1 second at peak contraction.',
+                            'Control the return without letting the weight stack clank.'
                         ],
-                        mistake: 'Using momentum and bouncing the weight stack.',
+                        mistake: 'Swinging your torso or bouncing reps fast.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'hip abduction adduction machine proper form'
+                        searchQuery: 'hip abduction machine proper form'
                     },
                     {
                         id: 'wed-6',
+                        name: 'Hip Adduction Machine',
+                        tag: 'Reordered to End', tagStyle: 'bg-purple-100 text-purple-700',
+                        equipment: 'Adduction Machine',
+                        sets: '2 sets × 12–15 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['adductors'],
+                        secondary: [],
+                        camera: 'front',
+                        why: 'Separate machine step kept from your old routine, moved after Leg Press so inner thighs stay fresh for heavy compounds.',
+                        machineSetup: 'Set range lever to a comfortable wide stretch and place inner knees/thighs squarely against the pads.',
+                        formCues: [
+                            'Squeeze thighs together smoothly and pause 1 second in the middle.',
+                            'Let pads open slowly into a controlled stretch.'
+                        ],
+                        mistake: 'Jerking into the stretch or slamming the plates together.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'hip adduction machine proper form'
+                    },
+                    {
+                        id: 'wed-7',
                         name: 'Zone 2 Incline Treadmill Walk',
                         tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
                         equipment: 'Treadmill',
@@ -782,7 +807,7 @@
                         machineSetup: 'Moderate incline, steady brisk pace, hands off rails.',
                         formCues: [
                             'Focus on smooth nasal breathing and upright posture.',
-                            'Adjust speed down slightly if legs feel heavy after squats and curls — incline does the work.'
+                            'Adjust speed down slightly if legs feel heavy after Leg Press and curls — incline does the work.'
                         ],
                         mistake: 'Trying to run 4 miles on already-trained legs (highest interference effect).',
                         video: null,
@@ -971,16 +996,16 @@
                     },
                     {
                         id: 'sun-2',
-                        name: 'Leg Press Machine (or Goblet Squat)',
-                        tag: '2×/Week Quad Hit', tagStyle: 'bg-blue-100 text-blue-700',
+                        name: 'Leg Press Machine (High Foot Placement)',
+                        tag: '2×/Week Quad & Glute', tagStyle: 'bg-blue-100 text-blue-700',
                         equipment: 'Leg Press Machine',
                         sets: '3 sets × 10–12 reps',
                         effort: '1–2 RIR • 2 min rest',
-                        primary: ['quads'],
-                        secondary: ['glute_maximus', 'adductors'],
+                        primary: ['quads', 'glute_maximus'],
+                        secondary: ['adductors', 'hamstrings'],
                         camera: 'front',
-                        why: 'Gives your quads a safe, stable second weekly hit with zero spinal fatigue after RDLs.',
-                        machineSetup: 'Place feet shoulder-width in the middle-low zone of the sled; set safety stops so knees don’t smash your chest.',
+                        why: 'Gives your quads a safe, stable second weekly hit while higher foot placement shifts extra work to glutes after RDLs.',
+                        machineSetup: 'Place feet slightly higher and wider on the sled than Wednesday; set safety stops cleanly.',
                         formCues: [
                             'Lower the sled slowly until knees bend deep without your lower back peeling off the pad.',
                             'Push evenly through midfoot and heels; stop just shy of snapping knees locked.',
@@ -988,7 +1013,7 @@
                         ],
                         mistake: 'Letting your tailbone curl off the seat at the bottom.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'leg press proper form'
+                        searchQuery: 'leg press high foot placement glutes form'
                     },
                     {
                         id: 'sun-3',
@@ -1083,8 +1108,7 @@
         let showDayHeatmap = false;
         let completedSteps = JSON.parse(localStorage.getItem('boulos_workout_done_v1') || '{}');
         let weightLogs = JSON.parse(localStorage.getItem('boulos_workout_logs_v1') || '{}');
-        let dayTimers = JSON.parse(localStorage.getItem('boulos_workout_timers_v1') || '{}');
-        let timerInterval = null;
+        let sessionLogs = JSON.parse(localStorage.getItem('boulos_workout_sessions_v1') || '{}');
 
         // --- Three.js Scene Variables ---
         let scene, camera, renderer, controls;
@@ -1525,76 +1549,41 @@
                     </div>
                 </div>`;
             }).join('');
-            updateTimerUI();
+            updateLastSessionBadge();
         }
 
-        function getDayTimer(dayKey) {
-            if (!dayTimers[dayKey]) {
-                dayTimers[dayKey] = { elapsedMs: 0, startedAt: null };
-            }
-            return dayTimers[dayKey];
-        }
-
-        function getElapsedMs(dayKey) {
-            const t = getDayTimer(dayKey);
-            return t.elapsedMs + (t.startedAt ? Math.max(0, Date.now() - t.startedAt) : 0);
-        }
-
-        function saveTimers() {
-            localStorage.setItem('boulos_workout_timers_v1', JSON.stringify(dayTimers));
-        }
-
-        function formatClock(ms) {
-            const totalSec = Math.floor(ms / 1000);
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            const s = totalSec % 60;
-            const mm = String(m).padStart(2, '0');
-            const ss = String(s).padStart(2, '0');
-            return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
-        }
-
-        function formatReadableDuration(ms) {
-            const totalSec = Math.max(1, Math.floor(ms / 1000));
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
-            return m > 0 ? `${m}m ${s}s` : `${s}s`;
-        }
-
-        function updateTimerUI() {
-            const pill = document.getElementById('timer-pill-btn');
-            if (!pill || currentDay === 'explore') return;
-            const t = getDayTimer(currentDay);
-            const ms = getElapsedMs(currentDay);
-            pill.textContent = formatClock(ms);
-            pill.className = t.startedAt
-                ? 'px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums transition-colors'
-                : 'px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 tabular-nums transition-colors';
-        }
-
-        function startTimerIfIdle(dayKey) {
-            const t = getDayTimer(dayKey);
-            if (!t.startedAt) {
-                t.startedAt = Date.now();
-                saveTimers();
-                updateTimerUI();
+        function updateLastSessionBadge() {
+            const badge = document.getElementById('last-session-badge');
+            if (!badge || currentDay === 'explore') return;
+            const list = sessionLogs[currentDay] || [];
+            const last = list[list.length - 1];
+            if (last) {
+                badge.textContent = `Last: ${last.minutes}m`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
             }
         }
 
-        function pauseTimer(dayKey) {
-            const t = getDayTimer(dayKey);
-            if (t.startedAt) {
-                t.elapsedMs += Math.max(0, Date.now() - t.startedAt);
-                t.startedAt = null;
-                saveTimers();
-                updateTimerUI();
-            }
+        function adjustFinishMin(delta) {
+            const input = document.getElementById('finish-minutes-input');
+            if (!input) return;
+            const cur = parseInt(input.value, 10) || 45;
+            input.value = Math.max(1, cur + delta);
         }
 
-        function toggleTimer(dayKey) {
-            const t = getDayTimer(dayKey);
-            if (t.startedAt) pauseTimer(dayKey);
-            else startTimerIfIdle(dayKey);
+        function saveFinishTime(dayKey) {
+            const input = document.getElementById('finish-minutes-input');
+            if (!input || !workoutPlan[dayKey]) return;
+            const minutes = parseInt(input.value, 10);
+            if (isNaN(minutes) || minutes <= 0) return;
+            if (!sessionLogs[dayKey]) sessionLogs[dayKey] = [];
+            sessionLogs[dayKey].push({ date: new Date().toISOString().slice(0, 10), minutes });
+            if (sessionLogs[dayKey].length > 30) {
+                sessionLogs[dayKey] = sessionLogs[dayKey].slice(-30);
+            }
+            localStorage.setItem('boulos_workout_sessions_v1', JSON.stringify(sessionLogs));
+            updateLastSessionBadge();
         }
 
         function clearDayProgress(dayKey) {
@@ -1602,8 +1591,6 @@
             if (!plan) return;
             plan.steps.forEach(s => delete completedSteps[s.id]);
             localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
-            dayTimers[dayKey] = { elapsedMs: 0, startedAt: null };
-            saveTimers();
             renderDayPlan();
             if (plan.steps[activeStepIndex]) {
                 updateDoneButton(plan.steps[activeStepIndex].id);
@@ -1657,18 +1644,21 @@
             requestAnimationFrame(step);
         }
 
-        function showFinishModal(dayKey, elapsedMs) {
+        function showFinishModal(dayKey) {
             const plan = workoutPlan[dayKey];
             if (!plan) return;
             const total = plan.steps.length;
             const todayStr = new Date().toISOString().slice(0, 10);
             const loggedToday = plan.steps.filter(s => (weightLogs[s.id] || []).some(l => l.date === todayStr)).length;
+            const history = sessionLogs[dayKey] || [];
+            const last = history[history.length - 1];
 
             document.getElementById('finish-day-label').textContent = `${plan.badge} Complete`;
             document.getElementById('finish-title').textContent = plan.title.split('—')[0].trim() + ' Done!';
-            document.getElementById('finish-time').textContent = formatReadableDuration(elapsedMs);
             document.getElementById('finish-steps').textContent = `${total}/${total}`;
             document.getElementById('finish-logged').textContent = `${loggedToday}/${total}`;
+            document.getElementById('finish-minutes-input').value = last ? last.minutes : 45;
+            document.getElementById('finish-last-time').textContent = last ? `Last: ${last.minutes}m` : '';
 
             const modal = document.getElementById('finish-modal');
             modal.classList.remove('hidden');
@@ -1711,10 +1701,6 @@
             completedSteps[stepId] = !completedSteps[stepId];
             localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
 
-            if (completedSteps[stepId] && currentDay !== 'explore') {
-                startTimerIfIdle(currentDay);
-            }
-
             renderDayPlan();
             if (currentDay !== 'explore' && plan) {
                 const step = plan.steps[activeStepIndex];
@@ -1723,8 +1709,7 @@
                 }
                 const nowDone = plan.steps.filter(s => completedSteps[s.id]).length;
                 if (prevDone < plan.steps.length && nowDone === plan.steps.length) {
-                    pauseTimer(currentDay);
-                    showFinishModal(currentDay, getElapsedMs(currentDay));
+                    showFinishModal(currentDay);
                 }
             }
         }
@@ -1751,7 +1736,6 @@
                 weightLogs[stepId] = weightLogs[stepId].slice(-30);
             }
             localStorage.setItem('boulos_workout_logs_v1', JSON.stringify(weightLogs));
-            startTimerIfIdle(currentDay);
             renderDayPlan();
             const plan = workoutPlan[currentDay];
             const step = plan?.steps[activeStepIndex];
@@ -2018,10 +2002,8 @@
         document.getElementById('reset-progress-btn').addEventListener('click', () => {
             clearDayProgress(currentDay);
         });
-        document.getElementById('timer-pill-btn').addEventListener('click', () => {
-            if (currentDay !== 'explore') toggleTimer(currentDay);
-        });
         document.getElementById('finish-clear-btn').addEventListener('click', () => {
+            saveFinishTime(currentDay);
             clearDayProgress(currentDay);
             const modal = document.getElementById('finish-modal');
             modal.classList.add('hidden');
@@ -2029,6 +2011,7 @@
             if (isMobile()) closeInfoPanel();
         });
         document.getElementById('finish-keep-btn').addEventListener('click', () => {
+            saveFinishTime(currentDay);
             const modal = document.getElementById('finish-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
@@ -2070,7 +2053,6 @@
 
         initThree();
         selectDay('mon');
-        timerInterval = setInterval(updateTimerUI, 1000);
     </script>
 </body>
 </html>
