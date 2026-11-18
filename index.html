@@ -72,19 +72,28 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes popIn {
+            0% { transform: scale(0.82); opacity: 0; }
+            70% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes drawCheck {
+            from { stroke-dashoffset: 48; }
+            to { stroke-dashoffset: 0; }
+        }
+        .animate-pop-in { animation: popIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .animate-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: drawCheck 0.45s 0.15s ease-out forwards; }
         @media (max-width: 767px) {
-            body { touch-action: manipulation; }
+            html, body { height: 100dvh; touch-action: manipulation; }
             #canvas-container {
                 top: 0;
                 left: 0;
                 right: 0;
                 bottom: auto;
-                height: 46dvh;
-                height: 46vh;
+                height: 44dvh;
             }
             #left-sidebar {
-                top: 46dvh;
-                top: 46vh;
+                top: 44dvh;
                 left: 0;
                 right: 0;
                 bottom: 0;
@@ -97,9 +106,11 @@
                 width: 100%;
                 height: 100%;
             }
+            #sequence-list {
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
+            }
             #info-panel {
-                top: 46dvh;
-                top: 46vh;
+                top: 44dvh;
                 left: 0;
                 right: 0;
                 bottom: 0;
@@ -111,9 +122,12 @@
             #info-panel.mobile-open {
                 transform: translateY(0) !important;
             }
+            #panel-footer {
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 34px) !important;
+                padding-top: 10px !important;
+            }
             #camera-dock {
-                top: calc(46dvh - 44px);
-                top: calc(46vh - 44px);
+                top: calc(44dvh - 42px);
                 bottom: auto;
                 left: 8px;
                 right: 8px;
@@ -166,13 +180,16 @@
                         <h2 id="day-title" class="text-sm md:text-base font-bold text-slate-900 mt-1"></h2>
                         <p id="day-subtitle" class="hidden md:block text-xs text-slate-500 mt-0.5"></p>
                     </div>
-                    <button id="reset-progress-btn" title="Reset today's checkmarks" class="text-[11px] font-medium text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100">Reset</button>
+                    <button id="reset-progress-btn" title="Clear checkmarks for next workout (keeps weight logs)" class="text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1 rounded-lg transition-colors shrink-0">Clear Steps</button>
                 </div>
                 <div class="mt-2 md:mt-3 flex items-center justify-between gap-2">
                     <div class="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
                         <div id="day-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                     <span id="day-progress-text" class="text-[11px] font-semibold text-slate-600 tabular-nums">0/0</span>
+                    <button id="timer-pill-btn" title="Tap to start/pause workout timer" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 tabular-nums transition-colors">
+                        00:00
+                    </button>
                     <button id="heatmap-btn" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors">
                         Day Map
                     </button>
@@ -230,10 +247,47 @@
             </button>
         </div>
         <div id="panel-content" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4"></div>
-        <div id="panel-footer" class="p-3 border-t border-slate-200 bg-white/80 flex items-center justify-between gap-2 hidden">
-            <button id="prev-step-btn" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">Prev</button>
-            <button id="toggle-done-btn" class="flex-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors">Mark Complete</button>
-            <button id="next-step-btn" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold">Next</button>
+        <div id="panel-footer" class="p-3 border-t border-slate-200 bg-white/95 flex items-center justify-between gap-2 hidden shrink-0">
+            <button id="prev-step-btn" class="px-3.5 py-2.5 md:py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">Prev</button>
+            <button id="toggle-done-btn" class="flex-1 px-3 py-2.5 md:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors">Mark Complete</button>
+            <button id="next-step-btn" class="px-3.5 py-2.5 md:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold">Next</button>
+        </div>
+    </div>
+
+    <!-- Workout Complete Celebration Modal -->
+    <canvas id="confetti-canvas" class="fixed inset-0 z-[60] pointer-events-none hidden"></canvas>
+    <div id="finish-modal" class="fixed inset-0 z-[55] bg-slate-900/45 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-sm w-full p-6 text-center animate-pop-in">
+            <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center">
+                <svg class="w-9 h-9 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path class="animate-check" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <div id="finish-day-label" class="text-xs font-bold uppercase tracking-wider text-emerald-600 mt-4">Workout Complete</div>
+            <h2 id="finish-title" class="text-xl font-extrabold text-slate-900 mt-1">Great Session!</h2>
+            <p class="text-xs text-slate-500 mt-1">Your weight logs are saved for next session.</p>
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Time</div>
+                    <div id="finish-time" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">00:00</div>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Steps</div>
+                    <div id="finish-steps" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">0/0</div>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Logged</div>
+                    <div id="finish-logged" class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">0</div>
+                </div>
+            </div>
+            <div class="mt-5 space-y-2">
+                <button id="finish-clear-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors">
+                    Clear Steps for Next Time
+                </button>
+                <button id="finish-keep-btn" class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
+                    Keep Current View
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1028,6 +1082,9 @@
         let activeStepIndex = 0;
         let showDayHeatmap = false;
         let completedSteps = JSON.parse(localStorage.getItem('boulos_workout_done_v1') || '{}');
+        let weightLogs = JSON.parse(localStorage.getItem('boulos_workout_logs_v1') || '{}');
+        let dayTimers = JSON.parse(localStorage.getItem('boulos_workout_timers_v1') || '{}');
+        let timerInterval = null;
 
         // --- Three.js Scene Variables ---
         let scene, camera, renderer, controls;
@@ -1439,6 +1496,12 @@
             listEl.innerHTML = plan.steps.map((step, idx) => {
                 const isDone = !!completedSteps[step.id];
                 const isActive = !showDayHeatmap && idx === activeStepIndex;
+                const logs = weightLogs[step.id] || [];
+                const latest = logs[logs.length - 1];
+                const isCardio = step.equipment === 'Treadmill';
+                const logPill = latest
+                    ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">${isCardio ? `${latest.val}% · ${latest.reps}m` : `${latest.val} lb × ${latest.reps}`}</span>`
+                    : '';
                 return `
                 <div class="seq-item rounded-xl border p-3 cursor-pointer ${isActive ? 'active' : 'border-slate-200 bg-white'}" onclick="selectStep(${idx})">
                     <div class="flex items-start gap-2.5">
@@ -1452,15 +1515,165 @@
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${step.tagStyle}">${step.tag}</span>
                             </div>
                             <div class="text-xs font-bold text-slate-900 mt-0.5 ${isDone ? 'line-through text-slate-400' : ''}">${step.name}</div>
-                            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-slate-500">
                                 <span class="font-semibold text-slate-700">${step.sets}</span>
                                 <span>•</span>
                                 <span>${step.equipment}</span>
+                                ${logPill}
                             </div>
                         </div>
                     </div>
                 </div>`;
             }).join('');
+            updateTimerUI();
+        }
+
+        function getDayTimer(dayKey) {
+            if (!dayTimers[dayKey]) {
+                dayTimers[dayKey] = { elapsedMs: 0, startedAt: null };
+            }
+            return dayTimers[dayKey];
+        }
+
+        function getElapsedMs(dayKey) {
+            const t = getDayTimer(dayKey);
+            return t.elapsedMs + (t.startedAt ? Math.max(0, Date.now() - t.startedAt) : 0);
+        }
+
+        function saveTimers() {
+            localStorage.setItem('boulos_workout_timers_v1', JSON.stringify(dayTimers));
+        }
+
+        function formatClock(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            const mm = String(m).padStart(2, '0');
+            const ss = String(s).padStart(2, '0');
+            return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+        }
+
+        function formatReadableDuration(ms) {
+            const totalSec = Math.max(1, Math.floor(ms / 1000));
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return m > 0 ? `${m}m ${s}s` : `${s}s`;
+        }
+
+        function updateTimerUI() {
+            const pill = document.getElementById('timer-pill-btn');
+            if (!pill || currentDay === 'explore') return;
+            const t = getDayTimer(currentDay);
+            const ms = getElapsedMs(currentDay);
+            pill.textContent = formatClock(ms);
+            pill.className = t.startedAt
+                ? 'px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums transition-colors'
+                : 'px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 tabular-nums transition-colors';
+        }
+
+        function startTimerIfIdle(dayKey) {
+            const t = getDayTimer(dayKey);
+            if (!t.startedAt) {
+                t.startedAt = Date.now();
+                saveTimers();
+                updateTimerUI();
+            }
+        }
+
+        function pauseTimer(dayKey) {
+            const t = getDayTimer(dayKey);
+            if (t.startedAt) {
+                t.elapsedMs += Math.max(0, Date.now() - t.startedAt);
+                t.startedAt = null;
+                saveTimers();
+                updateTimerUI();
+            }
+        }
+
+        function toggleTimer(dayKey) {
+            const t = getDayTimer(dayKey);
+            if (t.startedAt) pauseTimer(dayKey);
+            else startTimerIfIdle(dayKey);
+        }
+
+        function clearDayProgress(dayKey) {
+            const plan = workoutPlan[dayKey];
+            if (!plan) return;
+            plan.steps.forEach(s => delete completedSteps[s.id]);
+            localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
+            dayTimers[dayKey] = { elapsedMs: 0, startedAt: null };
+            saveTimers();
+            renderDayPlan();
+            if (plan.steps[activeStepIndex]) {
+                updateDoneButton(plan.steps[activeStepIndex].id);
+            }
+        }
+
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.classList.remove('hidden');
+
+            const colors = ['#2563eb', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+            const pieces = Array.from({ length: 110 }, () => ({
+                x: Math.random() * canvas.width,
+                y: -20 - Math.random() * canvas.height * 0.4,
+                w: 7 + Math.random() * 6,
+                h: 4 + Math.random() * 5,
+                vx: (Math.random() - 0.5) * 4,
+                vy: 3 + Math.random() * 4.5,
+                rot: Math.random() * Math.PI * 2,
+                vr: (Math.random() - 0.5) * 0.2,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            }));
+
+            let frame = 0;
+            function step() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.06;
+                    p.rot += p.vr;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = Math.max(0, 1 - frame / 150);
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                frame++;
+                if (frame < 150) {
+                    requestAnimationFrame(step);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.classList.add('hidden');
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function showFinishModal(dayKey, elapsedMs) {
+            const plan = workoutPlan[dayKey];
+            if (!plan) return;
+            const total = plan.steps.length;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const loggedToday = plan.steps.filter(s => (weightLogs[s.id] || []).some(l => l.date === todayStr)).length;
+
+            document.getElementById('finish-day-label').textContent = `${plan.badge} Complete`;
+            document.getElementById('finish-title').textContent = plan.title.split('—')[0].trim() + ' Done!';
+            document.getElementById('finish-time').textContent = formatReadableDuration(elapsedMs);
+            document.getElementById('finish-steps').textContent = `${total}/${total}`;
+            document.getElementById('finish-logged').textContent = `${loggedToday}/${total}`;
+
+            const modal = document.getElementById('finish-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            launchConfetti();
         }
 
         function selectStep(idx, keepListOnMobile = false) {
@@ -1492,16 +1705,139 @@
         }
 
         function toggleDone(stepId) {
+            const plan = workoutPlan[currentDay];
+            const prevDone = plan ? plan.steps.filter(s => completedSteps[s.id]).length : 0;
+
             completedSteps[stepId] = !completedSteps[stepId];
             localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
+
+            if (completedSteps[stepId] && currentDay !== 'explore') {
+                startTimerIfIdle(currentDay);
+            }
+
             renderDayPlan();
-            if (currentDay !== 'explore') {
-                const plan = workoutPlan[currentDay];
-                const step = plan?.steps[activeStepIndex];
+            if (currentDay !== 'explore' && plan) {
+                const step = plan.steps[activeStepIndex];
                 if (step && step.id === stepId) {
                     updateDoneButton(stepId);
                 }
+                const nowDone = plan.steps.filter(s => completedSteps[s.id]).length;
+                if (prevDone < plan.steps.length && nowDone === plan.steps.length) {
+                    pauseTimer(currentDay);
+                    showFinishModal(currentDay, getElapsedMs(currentDay));
+                }
             }
+        }
+
+        function adjustVal(delta) {
+            const input = document.getElementById('log-val-input');
+            if (!input) return;
+            const cur = parseFloat(input.value) || 0;
+            input.value = Math.max(0, +(cur + delta).toFixed(1));
+        }
+
+        function saveStepLog(stepId) {
+            const valEl = document.getElementById('log-val-input');
+            const repsEl = document.getElementById('log-reps-input');
+            if (!valEl || !repsEl) return;
+            const val = parseFloat(valEl.value);
+            const reps = parseInt(repsEl.value, 10);
+            if (isNaN(val) || isNaN(reps) || reps <= 0) return;
+
+            if (!weightLogs[stepId]) weightLogs[stepId] = [];
+            const today = new Date().toISOString().slice(0, 10);
+            weightLogs[stepId].push({ date: today, val, reps });
+            if (weightLogs[stepId].length > 30) {
+                weightLogs[stepId] = weightLogs[stepId].slice(-30);
+            }
+            localStorage.setItem('boulos_workout_logs_v1', JSON.stringify(weightLogs));
+            startTimerIfIdle(currentDay);
+            renderDayPlan();
+            const plan = workoutPlan[currentDay];
+            const step = plan?.steps[activeStepIndex];
+            if (step && step.id === stepId) {
+                openStepPanel(step, activeStepIndex, plan.steps.length, true);
+            }
+        }
+
+        function undoLastLog(stepId) {
+            if (!weightLogs[stepId] || weightLogs[stepId].length === 0) return;
+            weightLogs[stepId].pop();
+            localStorage.setItem('boulos_workout_logs_v1', JSON.stringify(weightLogs));
+            renderDayPlan();
+            const plan = workoutPlan[currentDay];
+            const step = plan?.steps[activeStepIndex];
+            if (step && step.id === stepId) {
+                openStepPanel(step, activeStepIndex, plan.steps.length, true);
+            }
+        }
+
+        function renderLogCard(step) {
+            const logs = weightLogs[step.id] || [];
+            const isCardio = step.equipment === 'Treadmill';
+            const unit = isCardio ? '%' : 'lb';
+            const valLabel = isCardio ? 'Incline %' : 'Weight (lb)';
+            const repsLabel = isCardio ? 'Minutes' : 'Reps';
+            const stepAmt = isCardio ? 1 : 5;
+            const latest = logs[logs.length - 1];
+            const prev = logs.length >= 2 ? logs[logs.length - 2] : null;
+            const bestVal = logs.length ? Math.max(...logs.map(l => l.val)) : null;
+            const delta = latest && prev ? +(latest.val - prev.val).toFixed(1) : null;
+            const deltaBadge = delta !== null && delta !== 0
+                ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold ${delta > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${delta > 0 ? '+' : ''}${delta} ${unit}</span>`
+                : '';
+
+            const defaultVal = latest ? latest.val : (isCardio ? 10 : '');
+            const defaultReps = latest ? latest.reps : (isCardio ? 25 : 10);
+            const recent = logs.slice(-5);
+            const maxBar = recent.length ? Math.max(...recent.map(r => r.val), 1) : 1;
+
+            return `
+            <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Weight &amp; Progress</div>
+                    <div class="flex items-center gap-1.5 text-[11px]">
+                        ${bestVal !== null ? `<span class="font-semibold text-slate-700">PR: ${bestVal} ${unit}</span>` : `<span class="text-slate-400">No logs yet</span>`}
+                        ${deltaBadge}
+                    </div>
+                </div>
+                <div class="grid grid-cols-12 gap-1.5 items-end">
+                    <div class="col-span-6">
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">${valLabel}</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="adjustVal(-${stepAmt})" class="px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">-${stepAmt}</button>
+                            <input id="log-val-input" type="number" step="any" inputmode="decimal" value="${defaultVal}" placeholder="${isCardio ? '10' : '0'}"
+                                class="w-full min-w-0 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
+                            <button type="button" onclick="adjustVal(${stepAmt})" class="px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">+${stepAmt}</button>
+                        </div>
+                    </div>
+                    <div class="col-span-3">
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">${repsLabel}</label>
+                        <input id="log-reps-input" type="number" inputmode="numeric" value="${defaultReps}"
+                            class="w-full px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
+                    </div>
+                    <div class="col-span-3">
+                        <button type="button" onclick="saveStepLog('${step.id}')"
+                            class="w-full py-1.5 px-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors">Save</button>
+                    </div>
+                </div>
+                ${recent.length ? `
+                <div class="pt-2 border-t border-indigo-200/70">
+                    <div class="flex items-end gap-1.5 h-8 mb-1.5">
+                        ${recent.map((r, i) => {
+                            const hPct = Math.max(22, Math.round((r.val / maxBar) * 100));
+                            const isLast = i === recent.length - 1;
+                            return `<div class="flex-1 flex flex-col items-center justify-end h-full">
+                                <div class="w-full rounded-t ${isLast ? 'bg-indigo-600' : 'bg-indigo-300'}" style="height:${hPct}%" title="${r.date}: ${r.val} ${unit} × ${r.reps}"></div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-600">
+                        <span>Last: <strong>${latest.val} ${unit} × ${latest.reps}</strong> (${latest.date.slice(5)})</span>
+                        <button type="button" onclick="undoLastLog('${step.id}')" class="text-rose-600 hover:underline font-semibold">Undo</button>
+                    </div>
+                </div>` : ''}
+            </div>`;
         }
 
         function updateDoneButton(stepId) {
@@ -1558,6 +1894,8 @@
             }
 
             document.getElementById('panel-content').innerHTML = `
+                ${renderLogCard(step)}
+
                 <div class="grid grid-cols-2 gap-2">
                     <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Primary Target</div>
@@ -1678,12 +2016,22 @@
             if (step) toggleDone(step.id);
         });
         document.getElementById('reset-progress-btn').addEventListener('click', () => {
-            const plan = workoutPlan[currentDay];
-            if (!plan) return;
-            plan.steps.forEach(s => delete completedSteps[s.id]);
-            localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
-            renderDayPlan();
-            updateDoneButton(plan.steps[activeStepIndex].id);
+            clearDayProgress(currentDay);
+        });
+        document.getElementById('timer-pill-btn').addEventListener('click', () => {
+            if (currentDay !== 'explore') toggleTimer(currentDay);
+        });
+        document.getElementById('finish-clear-btn').addEventListener('click', () => {
+            clearDayProgress(currentDay);
+            const modal = document.getElementById('finish-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (isMobile()) closeInfoPanel();
+        });
+        document.getElementById('finish-keep-btn').addEventListener('click', () => {
+            const modal = document.getElementById('finish-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         });
 
         // Camera buttons
@@ -1722,6 +2070,7 @@
 
         initThree();
         selectDay('mon');
+        timerInterval = setInterval(updateTimerUI, 1000);
     </script>
 </body>
 </html>
