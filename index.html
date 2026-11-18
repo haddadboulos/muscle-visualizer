@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Workout 3D">
+    <meta name="theme-color" content="#f8fafc">
+    <title>3D Muscle & Workout Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            overflow: hidden;
+            user-select: none;
+        }
+        #canvas-container {
+            background: radial-gradient(circle at 52% 45%, #ffffff 0%, #eef2f7 55%, #e2e8f0 100%);
+        }
+        canvas { display: block; outline: none; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(203, 213, 225, 0.9);
+            box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+        }
+        .day-tab {
+            transition: all 0.18s ease;
+        }
+        .day-tab.active {
+            background: #0f172a;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22);
+        }
+        .seq-item {
+            transition: all 0.16s ease;
+        }
+        .seq-item:hover {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+        .seq-item.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 4px 14px -4px rgba(37, 99, 235, 0.22);
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        #muscle-tooltip {
+            pointer-events: none;
+            transition: opacity 0.12s ease;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 767px) {
+            body { touch-action: manipulation; }
+            #canvas-container {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                height: 46dvh;
+                height: 46vh;
+            }
+            #left-sidebar {
+                top: 46dvh;
+                top: 46vh;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                padding: 0;
+            }
+            #day-panel, #explore-panel {
+                border-radius: 1.25rem 1.25rem 0 0;
+                border-bottom: 0;
+                width: 100%;
+                height: 100%;
+            }
+            #info-panel {
+                top: 46dvh;
+                top: 46vh;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                max-width: 100%;
+                border-radius: 1.25rem 1.25rem 0 0;
+                border-bottom: 0;
+                transform: translateY(110%);
+            }
+            #info-panel.mobile-open {
+                transform: translateY(0) !important;
+            }
+            #camera-dock {
+                top: calc(46dvh - 44px);
+                top: calc(46vh - 44px);
+                bottom: auto;
+                left: 8px;
+                right: 8px;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <!-- 3D Canvas -->
+    <div id="canvas-container" class="fixed inset-0 w-full h-full"></div>
+
+    <!-- Hover Tooltip -->
+    <div id="muscle-tooltip" class="fixed z-50 px-2.5 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-lg opacity-0 hidden md:block"></div>
+
+    <!-- Top Header + Day Navigation -->
+    <header class="fixed top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 z-30 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-1.5 md:gap-2.5 pointer-events-none">
+        <div class="glass-panel rounded-2xl px-3 md:px-4 py-2 md:py-2.5 flex items-center justify-between gap-3 pointer-events-auto">
+            <div class="flex items-center gap-2.5 md:gap-3 min-w-0">
+                <div class="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-sm shrink-0">
+                    3D
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-xs sm:text-sm md:text-base font-bold text-slate-900 leading-tight truncate">Muscle &amp; Recomp Explorer</h1>
+                    <p class="hidden sm:block text-[11px] text-slate-500">4-Day Upper/Lower + Zone 2 • Drag to rotate, click muscles or steps</p>
+                </div>
+            </div>
+            <button id="open-audit-btn" class="px-2.5 md:px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] md:text-xs font-semibold transition-colors whitespace-nowrap shrink-0">
+                Changes
+            </button>
+        </div>
+
+        <nav id="day-tabs" class="glass-panel rounded-2xl p-1 md:p-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar pointer-events-auto">
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="explore">Explore 3D</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="mon">Mon · Upper A</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="wed">Wed · Lower A</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="fri">Fri · Upper B</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="sun">Sun · Lower B</button>
+        </nav>
+    </header>
+
+    <!-- Left Sidebar (Desktop) / Bottom Sheet (Mobile) -->
+    <aside id="left-sidebar" class="fixed top-28 lg:top-20 left-3 bottom-16 w-80 md:w-96 z-20 flex flex-col pointer-events-none">
+        <!-- Day Plan Panel -->
+        <div id="day-panel" class="glass-panel rounded-2xl flex flex-col h-full overflow-hidden pointer-events-auto">
+            <div class="p-3 md:p-4 border-b border-slate-200 bg-white/70">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <span id="day-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-100 text-blue-700"></span>
+                        <h2 id="day-title" class="text-sm md:text-base font-bold text-slate-900 mt-1"></h2>
+                        <p id="day-subtitle" class="hidden md:block text-xs text-slate-500 mt-0.5"></p>
+                    </div>
+                    <button id="reset-progress-btn" title="Reset today's checkmarks" class="text-[11px] font-medium text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100">Reset</button>
+                </div>
+                <div class="mt-2 md:mt-3 flex items-center justify-between gap-2">
+                    <div class="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div id="day-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <span id="day-progress-text" class="text-[11px] font-semibold text-slate-600 tabular-nums">0/0</span>
+                    <button id="heatmap-btn" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors">
+                        Day Map
+                    </button>
+                </div>
+            </div>
+            <div id="sequence-list" class="flex-1 overflow-y-auto custom-scroll p-2.5 md:p-3 space-y-2 pb-6"></div>
+        </div>
+
+        <!-- Explore Mode Muscle Filter Panel -->
+        <div id="explore-panel" class="glass-panel rounded-2xl p-3 md:p-3.5 md:w-52 pointer-events-auto hidden">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Muscle Groups</h3>
+            <div class="flex md:flex-col gap-1.5 md:gap-1 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white transition-colors" data-group="all">Show All</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="chest">Chest</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="back">Back</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="shoulders">Shoulders</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="arms">Arms</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="core">Core</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="legs">Legs</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="glutes">Glutes</button>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-500 leading-relaxed">
+                Tap any muscle on the 3D body above to inspect machines &amp; form guides.
+            </div>
+        </div>
+    </aside>
+
+    <!-- Bottom Camera & Legend Dock -->
+    <div id="camera-dock" class="fixed bottom-3 left-3 z-20 flex flex-wrap items-center gap-1.5 md:gap-2">
+        <div class="glass-panel rounded-xl p-0.5 md:p-1 flex items-center gap-0.5 md:gap-1">
+            <button id="front-view" class="px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-[11px] md:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors">Front</button>
+            <button id="angle-view" class="px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-[11px] md:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors">3/4</button>
+            <button id="side-view" class="px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-[11px] md:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors">Side</button>
+            <button id="back-view" class="px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-[11px] md:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors">Back</button>
+        </div>
+        <div id="highlight-legend" class="glass-panel rounded-xl px-2.5 md:px-3 py-1 md:py-1.5 flex items-center gap-2.5 md:gap-3 text-[10px] md:text-[11px] font-medium text-slate-600">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-blue-600 inline-block"></span>Primary</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-amber-400 inline-block"></span>Secondary</span>
+        </div>
+    </div>
+
+    <!-- Right Detail Drawer (Desktop) / Step Form Sheet (Mobile) -->
+    <div id="info-panel" class="fixed top-20 right-3 bottom-3 w-full max-w-md glass-panel rounded-2xl z-30 transform md:translate-x-[110%] transition-transform duration-300 flex flex-col overflow-hidden">
+        <div class="p-3.5 md:p-4 border-b border-slate-200 bg-white/80 flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <div id="panel-eyebrow" class="text-[11px] font-bold uppercase tracking-wider text-blue-600"></div>
+                <h2 id="panel-title" class="text-base md:text-lg font-bold text-slate-900 leading-snug mt-0.5">Select an item</h2>
+                <p id="panel-subtitle" class="text-xs text-slate-500 mt-0.5 md:mt-1"></p>
+            </div>
+            <button id="close-panel-btn" class="px-2.5 py-1 md:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 md:bg-transparent hover:bg-slate-200 transition-colors flex items-center gap-1 shrink-0">
+                <span class="md:hidden text-xs font-semibold">← Steps</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="hidden md:block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="panel-content" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4"></div>
+        <div id="panel-footer" class="p-3 border-t border-slate-200 bg-white/80 flex items-center justify-between gap-2 hidden">
+            <button id="prev-step-btn" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">Prev</button>
+            <button id="toggle-done-btn" class="flex-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors">Mark Complete</button>
+            <button id="next-step-btn" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold">Next</button>
+        </div>
+    </div>
+
+    <!-- Routine Changes Audit Modal -->
+    <div id="audit-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Why Your Routine Changed (Same 4 Days)</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Comparing your old 15-move circuit to the recomposition Upper/Lower + Zone 2 plan</p>
+                </div>
+                <button id="close-audit-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto custom-scroll space-y-4 text-sm text-slate-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1.5">Added (Biggest Gaps)</div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li><strong>Chest Pressing (Mon &amp; Fri):</strong> Old plan had 0 chest exercises. Added Incline Press + Flat Chest Press.</li>
+                            <li><strong>Shoulders &amp; V-Taper (Mon &amp; Fri):</strong> Old plan had 0 shoulder work. Added Overhead Press + Lateral Raises to widen shoulders above the waist.</li>
+                            <li><strong>2–3 Hard Sets per Move:</strong> Upgraded from 1 heavy set to 10–14 weekly sets/muscle at 1–2 reps shy of failure.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                        <div class="text-xs font-bold uppercase tracking-wider text-blue-700 mb-1.5">Kept &amp; Reordered</div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li><strong>Goblet Squat moved to #1 (Wed):</strong> Previously done at #12 after legs were already fatigued.</li>
+                            <li><strong>Abduction / Adduction moved to end (Wed):</strong> Stops pre-fatiguing your hip stabilizers before squats.</li>
+                            <li><strong>Kept favorites:</strong> Pull-ups/Chin-ups, Seated Row, Lying Leg Curl, Leg Extension, Calf Raise, Glute Kickback, DB Curls, Tricep Machine, Rope Crunch, Captain's Chair.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+                    <div class="text-xs font-bold uppercase tracking-wider text-amber-800 mb-1.5">Replaced for Love-Handle Fat Loss</div>
+                    <ul class="space-y-1.5 text-xs text-slate-700">
+                        <li><strong>4-Mile Post-Lift Run → 20–35 min Zone 2 Incline Walk:</strong> Same 4 gym visits, far less leg interference and post-run hunger rebound so your calorie deficit actually sticks.</li>
+                        <li><strong>Dropped Torso Twist Machine:</strong> Spot reduction is a myth; heavy oblique twisting builds thicker side waist muscle under love handles without burning fat there.</li>
+                        <li><strong>Nutrition Anchor:</strong> Pair this with a 10–20% calorie deficit and 0.8–1.0 g protein/lb daily.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Confirmed Jeff Nippard Reference Videos + Specific Form Links ---
+        const REF_VIDEOS = {
+            chest:     { title: 'Best & Worst Chest Exercises (Science)', url: 'https://www.youtube.com/watch?v=fGm-ef-4PVk', vid: 'fGm-ef-4PVk' },
+            back:      { title: 'Best & Worst Back Exercises (Science)',  url: 'https://www.youtube.com/watch?v=jLvqKgW-_G8', vid: 'jLvqKgW-_G8' },
+            shoulders: { title: 'Best & Worst Shoulder Exercises (Science)', url: 'https://www.youtube.com/watch?v=SgyUoY0IZ7A', vid: 'SgyUoY0IZ7A' },
+            biceps:    { title: 'Best & Worst Biceps Exercises (Science)', url: 'https://www.youtube.com/watch?v=GNO4OtYoCYk', vid: 'GNO4OtYoCYk' },
+            triceps:   { title: 'Best & Worst Triceps Exercises (Science)', url: 'https://www.youtube.com/watch?v=OpRMRhr0Ycc', vid: 'OpRMRhr0Ycc' },
+            legs:      { title: 'Science-Based Leg Day For Muscle Growth', url: 'https://www.youtube.com/watch?v=H6mRkx1x77k', vid: 'H6mRkx1x77k' },
+            abs:       { title: 'Get Abs In 60 Days (Science)', url: 'https://www.youtube.com/watch?v=Tn-XvYG9x7w', vid: 'Tn-XvYG9x7w' },
+            arms:      { title: 'Only 2 Exercises For Massive Arms', url: 'https://www.youtube.com/watch?v=WvlDMlMx1Ok', vid: 'WvlDMlMx1Ok' }
+        };
+
+        // --- Comprehensive 3D Muscle Data ---
+        const muscleData = {
+            'upper_chest': {
+                name: 'Upper Chest (Clavicular Head)', group: 'chest',
+                description: 'Upper portion of pectoralis major; creates upper-chest fullness and frame.',
+                machines: ['Incline Dumbbell Press', 'Incline Chest Press Machine', 'Incline Smith Machine Press', 'Low-to-High Cable Fly'],
+                video: REF_VIDEOS.chest
+            },
+            'middle_chest': {
+                name: 'Middle Chest (Sternal Head)', group: 'chest',
+                description: 'Main bulk of the chest; drives horizontal pressing strength and calorie burn.',
+                machines: ['Flat Chest Press Machine', 'Pec Deck Fly Machine', 'Dumbbell Bench Press', 'Converging Chest Press'],
+                video: REF_VIDEOS.chest
+            },
+            'lower_chest': {
+                name: 'Lower Chest (Abdominal Head)', group: 'chest',
+                description: 'Lower border of the pecs, trained via dips and high-to-low presses.',
+                machines: ['Chest Dip Machine', 'High-to-Low Cable Crossover', 'Decline Chest Press Machine'],
+                video: REF_VIDEOS.chest
+            },
+            'lats': {
+                name: 'Latissimus Dorsi (Lats)', group: 'back',
+                description: 'Widest back muscle — creates the V-taper that makes your waist look narrower.',
+                machines: ['Neutral-Grip Pull-Ups', 'Wide-Grip Lat Pulldown', 'Assisted Pull-Up Machine', 'Close-Grip Lat Pulldown'],
+                video: REF_VIDEOS.back
+            },
+            'rhomboids': {
+                name: 'Rhomboids & Mid-Back', group: 'back',
+                description: 'Pulls shoulder blades together for posture and upper-back thickness.',
+                machines: ['Seated Cable Row', 'Chest-Supported Row Machine', 'Reverse Fly Machine'],
+                video: REF_VIDEOS.back
+            },
+            'traps': {
+                name: 'Trapezius (Upper & Mid)', group: 'back',
+                description: 'Spans neck to mid-back; stabilizes scapulae during heavy rows and carries.',
+                machines: ['Chest-Supported Row', 'Cable Face Pulls', 'Shrug Machine'],
+                video: REF_VIDEOS.back
+            },
+            'erector_spinae': {
+                name: 'Erector Spinae (Lower Back)', group: 'back',
+                description: 'Supports the spine during squats, RDLs, and trap bar deadlifts.',
+                machines: ['Back Extension Machine', 'Romanian Deadlift', 'Trap Bar Deadlift'],
+                video: REF_VIDEOS.legs
+            },
+            'front_delts': {
+                name: 'Anterior Deltoids (Front Shoulders)', group: 'shoulders',
+                description: 'Front shoulder head worked heavily in overhead and incline pressing.',
+                machines: ['Shoulder Press Machine', 'Dumbbell Overhead Press', 'Incline Press'],
+                video: REF_VIDEOS.shoulders
+            },
+            'side_delts': {
+                name: 'Lateral Deltoids (Side Shoulders)', group: 'shoulders',
+                description: 'Primary driver of shoulder width — key visual counterbalance to love handles.',
+                machines: ['Lateral Raise Machine', 'Cable Lateral Raise', 'Dumbbell Lateral Raise'],
+                video: REF_VIDEOS.shoulders
+            },
+            'rear_delts': {
+                name: 'Posterior Deltoids (Rear Shoulders)', group: 'shoulders',
+                description: 'Balances pressing work and rounds out upper-back aesthetics.',
+                machines: ['Reverse Pec Deck', 'Cable Face Pull', 'Wide-Grip Seated Row'],
+                video: REF_VIDEOS.shoulders
+            },
+            'biceps': {
+                name: 'Biceps Brachii', group: 'arms',
+                description: 'Front upper-arm flexors; hit via curls and chin-ups.',
+                machines: ['Dumbbell Bicep Curls', 'Incline Dumbbell Curl', 'Preacher Curl Machine', 'Cable Curl'],
+                video: REF_VIDEOS.biceps
+            },
+            'brachialis': {
+                name: 'Brachialis', group: 'arms',
+                description: 'Deep arm flexor recruited by neutral-grip pull-ups and hammer curls.',
+                machines: ['Neutral-Grip Pull-Ups', 'Dumbbell Hammer Curls', 'Rope Cable Hammer Curl'],
+                video: REF_VIDEOS.biceps
+            },
+            'triceps': {
+                name: 'Triceps Brachii', group: 'arms',
+                description: 'Makes up ~2/3 of upper-arm size and assists all chest/shoulder presses.',
+                machines: ['Tricep Extension Machine', 'Cable Rope Pushdown', 'Overhead Cable Extension'],
+                video: REF_VIDEOS.triceps
+            },
+            'forearms': {
+                name: 'Forearms & Grip', group: 'arms',
+                description: 'Trained directly during pull-ups, rows, RDLs, and goblet squats.',
+                machines: ['Pull-Ups / Rows', 'Farmer Carries', 'Cable Wrist Curls'],
+                video: REF_VIDEOS.arms
+            },
+            'abs': {
+                name: 'Rectus Abdominis (Abs)', group: 'core',
+                description: 'Flexes the spine against resistance in rope crunches and captain’s chair raises.',
+                machines: ['Rope Cable Crunch', "Captain's Chair Knee/Leg Raise", 'Ab Crunch Machine'],
+                video: REF_VIDEOS.abs
+            },
+            'obliques': {
+                name: 'Obliques', group: 'core',
+                description: 'Side core stabilizers. Trained isometrically via heavy compounds instead of heavy twists.',
+                machines: ['Goblet Squat Bracing', 'Side Plank', 'Cable Pallof Press'],
+                video: REF_VIDEOS.abs
+            },
+            'serratus': {
+                name: 'Serratus Anterior', group: 'core',
+                description: 'Stabilizes the shoulder blades during overhead presses and pullovers.',
+                machines: ['Overhead Press', 'Cable Pullover', 'Ab Wheel Rollout'],
+                video: REF_VIDEOS.abs
+            },
+            'quads': {
+                name: 'Quadriceps', group: 'legs',
+                description: 'Largest front-thigh muscle group; huge driver of metabolic demand and lower-body strength.',
+                machines: ['Goblet Squat', 'Hack Squat / Leg Press', 'Leg Extension Machine', 'Bulgarian Split Squat'],
+                video: REF_VIDEOS.legs
+            },
+            'hamstrings': {
+                name: 'Hamstrings', group: 'legs',
+                description: 'Back of the thigh; requires both hip hinge (RDL) and knee flexion (Leg Curl).',
+                machines: ['Lying Leg Curl', 'Seated Leg Curl', 'Romanian Deadlift'],
+                video: REF_VIDEOS.legs
+            },
+            'adductors': {
+                name: 'Adductors (Inner Thigh)', group: 'legs',
+                description: 'Inner thigh muscles that stabilize squats and hip extension.',
+                machines: ['Hip Adduction Machine', 'Goblet Squat (Deep)'],
+                video: REF_VIDEOS.legs
+            },
+            'calves': {
+                name: 'Calves (Gastrocnemius & Soleus)', group: 'legs',
+                description: 'Lower-leg muscles; pause 2 seconds in the deep stretch at the bottom of every rep.',
+                machines: ['Standing Calf Raise Machine', 'Seated Calf Raise Machine', 'Leg Press Calf Raise'],
+                video: REF_VIDEOS.legs
+            },
+            'glute_maximus': {
+                name: 'Gluteus Maximus', group: 'glutes',
+                description: 'Largest muscle in the body; powers squats, RDLs, hip thrusts, and kickbacks.',
+                machines: ['Standing Glute Kickback Machine', 'Hip Thrust / Trap Bar Deadlift', 'Goblet Squat'],
+                video: REF_VIDEOS.legs
+            },
+            'glute_medius': {
+                name: 'Gluteus Medius (Side Hip)', group: 'glutes',
+                description: 'Stabilizes the pelvis during squats and walking.',
+                machines: ['Hip Abduction Machine', 'Cable Hip Abduction', 'Bulgarian Split Squat'],
+                video: REF_VIDEOS.legs
+            }
+        };
+
+        const muscleAliases = {
+            'upper_lats': 'lats', 'lower_lats': 'lats',
+            'traps_upper': 'traps', 'traps_middle': 'traps',
+            'bicep_long': 'biceps', 'bicep_short': 'biceps',
+            'tricep_long': 'triceps', 'tricep_lateral': 'triceps', 'tricep_medial': 'triceps',
+            'upper_abs': 'abs', 'lower_abs': 'abs',
+            'quads_vastus_lateralis': 'quads', 'quads_vastus_medialis': 'quads', 'quads_rectus_femoris': 'quads',
+            'hamstring_bicep_femoris': 'hamstrings', 'hamstring_semitendinosus': 'hamstrings',
+            'calves_gastrocnemius': 'calves', 'calves_soleus': 'calves'
+        };
+
+        // --- 4-Day Recomposition Plan (Mon / Wed / Fri / Sun) ---
+        const workoutPlan = {
+            mon: {
+                badge: 'Day 1 • Monday',
+                title: 'Upper A — Chest, Width & Zone 2',
+                subtitle: 'Adds missing chest & shoulder width while keeping pull-ups and rows fresh.',
+                steps: [
+                    {
+                        id: 'mon-1',
+                        name: 'Incline DB or Machine Chest Press',
+                        tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Machine / Dumbbells',
+                        sets: '3 sets × 8–10 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['upper_chest'],
+                        secondary: ['front_delts', 'triceps', 'middle_chest'],
+                        camera: 'front',
+                        why: 'Your old routine had 0 chest exercises. Pressing on a 30° incline builds upper chest fullness, burns high calories, and balances all your pulling.',
+                        machineSetup: 'Set bench or machine seat so handles align with upper chest/collarbone. Keep feet planted and shoulder blades pinched back into the pad.',
+                        formCues: [
+                            'Lower the weight under a 2–3 second count until dumbbells/handles reach chest level.',
+                            'Keep elbows tucked ~45° from your ribs rather than flared straight out at 90°.',
+                            'Drive up smoothly without letting your shoulders roll forward off the pad.'
+                        ],
+                        mistake: 'Bouncing out of the bottom or shrugging shoulders up toward ears.',
+                        video: REF_VIDEOS.chest,
+                        searchQuery: 'incline dumbbell chest press proper form'
+                    },
+                    {
+                        id: 'mon-2',
+                        name: 'Neutral-Grip Pull-Ups (or Chin/Pull Mix)',
+                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Bodyweight / Assisted',
+                        sets: '3 sets × 6–10 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['lats'],
+                        secondary: ['biceps', 'brachialis', 'rhomboids', 'forearms'],
+                        camera: 'back',
+                        why: 'Kept from your old routine, expanded from 1 mixed set to 3 full sets while fresh so your lats widen into a V-taper.',
+                        machineSetup: 'Use parallel neutral-grip handles (or assisted pull-up pad if needed to stay in 6–10 reps).',
+                        formCues: [
+                            'Start from a dead hang with shoulders pulled down away from your ears.',
+                            'Pull your elbows down toward your back pockets until chin clears the bar.',
+                            'Lower smoothly over 2–3 seconds to a full stretch at the bottom.'
+                        ],
+                        mistake: 'Half-reps that cut off the bottom stretch (where lats grow most).',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'neutral grip pull up proper form'
+                    },
+                    {
+                        id: 'mon-3',
+                        name: 'Shoulder Press Machine (or Seated DB Press)',
+                        tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Machine / Dumbbells',
+                        sets: '3 sets × 8–10 reps',
+                        effort: '1–2 RIR • 90s rest',
+                        primary: ['front_delts', 'side_delts'],
+                        secondary: ['triceps', 'upper_chest', 'serratus'],
+                        camera: 'front',
+                        why: 'Your old routine had zero overhead pressing. Stronger, broader delts create upper-body proportion above the waist.',
+                        machineSetup: 'Adjust seat so handles start right at chin/shoulder height with forearms vertical.',
+                        formCues: [
+                            'Brace your abs tight so your lower back does not arch off the pad.',
+                            'Press smoothly overhead without slamming weights at the top.',
+                            'Lower until hands are level with ears/chin for a full shoulder stretch.'
+                        ],
+                        mistake: 'Flaring ribs and turning the press into an incline chest press.',
+                        video: REF_VIDEOS.shoulders,
+                        searchQuery: 'machine shoulder press proper form'
+                    },
+                    {
+                        id: 'mon-4',
+                        name: 'Seated Cable Row',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Cable Machine',
+                        sets: '3 sets × 8–12 reps',
+                        effort: '1–2 RIR • 90s rest',
+                        primary: ['rhomboids', 'lats'],
+                        secondary: ['traps', 'biceps', 'rear_delts'],
+                        camera: 'back',
+                        why: 'Kept ("sit and pull handles toward me") with 3 working sets to thicken mid-back and counterbalance pressing.',
+                        machineSetup: 'Brace feet on platform with a slight knee bend and torso upright (minimal swinging).',
+                        formCues: [
+                            'Let shoulder blades glide forward slightly at the start for a full mid-back stretch.',
+                            'Pull handles toward your belly button while driving elbows back.',
+                            'Pause 1 second with shoulder blades squeezed before returning slowly.'
+                        ],
+                        mistake: 'Using lower-back momentum to heave the stack backward.',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'seated cable row proper form'
+                    },
+                    {
+                        id: 'mon-5',
+                        name: 'Lateral Raise Machine (or Cable/DB)',
+                        tag: 'New V-Taper Key', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Machine / Cable',
+                        sets: '3 sets × 12–15 reps',
+                        effort: '0–1 RIR • 60s rest',
+                        primary: ['side_delts'],
+                        secondary: ['traps'],
+                        camera: 'angle',
+                        why: 'Side delts are the #1 muscle for shoulder width, making love handles look noticeably smaller as your upper frame widens.',
+                        machineSetup: 'If using cable, set pulley at wrist height and stand sideways; if machine, align elbow pads with upper arms.',
+                        formCues: [
+                            'Lead the motion by pushing your elbows out toward the walls, not shrugging up.',
+                            'Raise arms slightly forward (~20–30° in front of torso) up to shoulder height.',
+                            'Control the negative for 2 seconds; do not drop the weight.'
+                        ],
+                        mistake: 'Going too heavy and turning it into an upper-trap shrug.',
+                        video: REF_VIDEOS.shoulders,
+                        searchQuery: 'cable lateral raise proper form'
+                    },
+                    {
+                        id: 'mon-6',
+                        name: 'Rope Cable Crunch ("Noodle Handles")',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'High Cable + Rope',
+                        sets: '2 sets × 10–15 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['abs'],
+                        secondary: ['obliques'],
+                        camera: 'front',
+                        why: 'Kept your favorite weighted ab move — moved to the end so your core stays fresh for heavy presses and pull-ups.',
+                        machineSetup: 'Kneel 2–3 feet back from high pulley, lock rope ends beside your temples/neck, and freeze your hips.',
+                        formCues: [
+                            'Curl your ribcage down toward your pelvis (round your spine) rather than bowing at the hips.',
+                            'Exhale hard at the bottom crunch and hold for 1 second.',
+                            'Keep elbows fixed near your head — arms should not pull the weight.'
+                        ],
+                        mistake: 'Sitting back onto your heels (which turns it into a hip hinge, not abs).',
+                        video: REF_VIDEOS.abs,
+                        searchQuery: 'cable rope crunch proper form'
+                    },
+                    {
+                        id: 'mon-7',
+                        name: 'Zone 2 Incline Treadmill Walk',
+                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        equipment: 'Treadmill',
+                        sets: '25–30 min steady',
+                        effort: 'Zone 2 (Conversational Pace)',
+                        primary: ['glute_maximus', 'calves'],
+                        secondary: ['quads', 'hamstrings'],
+                        camera: 'side',
+                        why: 'Replaces the 4-mile run right after lifting: burns steady fat calories with low cortisol and minimal appetite rebound, using 0 extra gym days.',
+                        machineSetup: 'Set incline high enough (e.g. 6–12%) at a brisk walking speed (2.8–3.5 mph) where you breathe steadily but can still speak full sentences.',
+                        formCues: [
+                            'Walk tall without holding onto the front console rails (holding cuts calorie burn ~25%).',
+                            'Keep heart rate around 65–75% of max (nose breathing or short sentences feels doable).',
+                            'Push through the glutes and midfoot on every stride.'
+                        ],
+                        mistake: 'Leaning back and hanging onto the handrails or turning it into a sprint.',
+                        video: null,
+                        searchQuery: 'zone 2 incline treadmill walk fat loss'
+                    }
+                ]
+            },
+            wed: {
+                badge: 'Day 2 • Wednesday',
+                title: 'Lower A — Quads, Glutes & Hips',
+                subtitle: 'Moves Goblet Squat from #12 to #1 when fresh; keeps all your leg & hip machines.',
+                steps: [
+                    {
+                        id: 'wed-1',
+                        name: 'Goblet Squat (or Hack Squat / Leg Press)',
+                        tag: 'Reordered to #1', tagStyle: 'bg-purple-100 text-purple-700',
+                        equipment: 'Dumbbell / Machine',
+                        sets: '3 sets × 8–12 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['quads', 'glute_maximus'],
+                        secondary: ['adductors', 'abs', 'erector_spinae'],
+                        camera: 'front',
+                        why: 'You used to do Goblet Squats at #12 after pre-exhausting hips and legs. Doing them #1 lets you lift heavier and burn far more energy.',
+                        machineSetup: 'Hold a heavy dumbbell vertically tight against your upper chest, feet shoulder-width, toes turned slightly out.',
+                        formCues: [
+                            'Brace your core, push knees out over toes, and sit down until thighs are at least parallel.',
+                            'Keep chest tall and elbows tucked inside your knees at the bottom.',
+                            'Drive smoothly through your whole foot back to standing.'
+                        ],
+                        mistake: 'Letting the dumbbell pull your torso forward or cutting depth shallow.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'goblet squat proper form'
+                    },
+                    {
+                        id: 'wed-2',
+                        name: 'Standing Glute Kickback Machine',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Glute Machine / Cable',
+                        sets: '2 sets × 10–12 / leg',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['glute_maximus'],
+                        secondary: ['hamstrings', 'glute_medius'],
+                        camera: 'back',
+                        why: 'Kept ("stand and push one leg behind me") right after squats while hip extension strength is high.',
+                        machineSetup: 'Plant standing foot firmly, brace torso slightly forward against the pad, and place working heel/arch on the pedal.',
+                        formCues: [
+                            'Drive leg straight back and slightly up by squeezing your glute, not arching your lower back.',
+                            'Pause 1 second at full extension before returning with control.',
+                            'Keep your hips square to the machine.'
+                        ],
+                        mistake: 'Hyperextending your lumbar spine to swing the leg higher.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'standing glute kickback machine form'
+                    },
+                    {
+                        id: 'wed-3',
+                        name: 'Leg Extension Machine',
+                        tag: 'Kept & Consistent', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Machine',
+                        sets: '3 sets × 10–15 reps',
+                        effort: '0–1 RIR • 90s rest',
+                        primary: ['quads'],
+                        secondary: [],
+                        camera: 'front',
+                        why: 'Made consistent instead of "sometimes" — specifically targets the rectus femoris quad head that squats miss.',
+                        machineSetup: 'Align knee joint with the machine pivot axle; set shin pad just above your ankles and grip side handles tight.',
+                        formCues: [
+                            'Kick up smoothly to full knee lockout and squeeze quads for 1 beat.',
+                            'Lower slowly over 2–3 seconds to get a deep quad stretch at the bottom.',
+                            'Keep hips glued down to the seat.'
+                        ],
+                        mistake: 'Jerking the weight up with momentum and dropping the stack.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'leg extension machine proper form'
+                    },
+                    {
+                        id: 'wed-4',
+                        name: 'Lying Leg Curl',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Machine',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1 RIR • 90s rest',
+                        primary: ['hamstrings'],
+                        secondary: ['calves'],
+                        camera: 'back',
+                        why: 'Kept ("lie flat and pull legs towards me") for complete knee-flexion hamstring development.',
+                        machineSetup: 'Align knees just off the edge of the bench pad; ankle roller sits right above your heels.',
+                        formCues: [
+                            'Press your hips/pelvis firmly down into the bench the entire set.',
+                            'Curl heels toward glutes smoothly without lifting your butt.',
+                            'Lower slowly all the way to near-straight legs.'
+                        ],
+                        mistake: 'Letting your hips pop up off the pad as you curl.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'lying leg curl machine proper form'
+                    },
+                    {
+                        id: 'wed-5',
+                        name: 'Hip Abduction + Hip Adduction (Superset)',
+                        tag: 'Reordered to End', tagStyle: 'bg-purple-100 text-purple-700',
+                        equipment: 'Hip Machines',
+                        sets: '2 sets × 12–15 each',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['glute_medius', 'adductors'],
+                        secondary: ['glute_maximus'],
+                        camera: 'front',
+                        why: 'Kept both hip machines you like, moved from #1 to the end so you do not fatigue squat stabilizers before lifting.',
+                        machineSetup: 'Sit upright (or lean slightly forward on abduction to bias glute medius). Move smoothly without slamming pads.',
+                        formCues: [
+                            'Push knees apart (abduction) with a 1-second pause at peak contraction.',
+                            'Control the return smoothly instead of letting plates clank.',
+                            'Pair immediately with adduction (squeezing thighs together slowly).'
+                        ],
+                        mistake: 'Using momentum and bouncing the weight stack.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'hip abduction adduction machine proper form'
+                    },
+                    {
+                        id: 'wed-6',
+                        name: 'Zone 2 Incline Treadmill Walk',
+                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        equipment: 'Treadmill',
+                        sets: '20–25 min steady',
+                        effort: 'Zone 2 (Conversational Pace)',
+                        primary: ['glute_maximus', 'calves'],
+                        secondary: ['quads', 'hamstrings'],
+                        camera: 'side',
+                        why: 'Shorter 20–25 min incline walk on leg day flushes metabolic fatigue and burns fat without wrecking leg muscle recovery.',
+                        machineSetup: 'Moderate incline, steady brisk pace, hands off rails.',
+                        formCues: [
+                            'Focus on smooth nasal breathing and upright posture.',
+                            'Adjust speed down slightly if legs feel heavy after squats and curls — incline does the work.'
+                        ],
+                        mistake: 'Trying to run 4 miles on already-trained legs (highest interference effect).',
+                        video: null,
+                        searchQuery: 'zone 2 cardio after leg day incline walk'
+                    }
+                ]
+            },
+            fri: {
+                badge: 'Day 3 • Friday',
+                title: 'Upper B — Chest, Pull & Arms',
+                subtitle: 'Second weekly hit for chest, back, and lateral delts plus direct biceps & triceps.',
+                steps: [
+                    {
+                        id: 'fri-1',
+                        name: 'Flat Chest Press Machine (or Pec Deck)',
+                        tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Machine',
+                        sets: '3 sets × 8–12 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['middle_chest'],
+                        secondary: ['front_delts', 'triceps', 'lower_chest'],
+                        camera: 'front',
+                        why: 'Gives your chest a second weekly stimulus focused on the mid-pec sternal fibers while keeping joint fatigue low.',
+                        machineSetup: 'Adjust seat so handles line up with mid-chest/nipple line. Keep chest proud and shoulders pinned down.',
+                        formCues: [
+                            'Let handles come back until you feel a strong stretch across your pecs.',
+                            'Press forward smoothly; stop just short of locking elbows hard.',
+                            'Keep wrists stacked straight over forearms.'
+                        ],
+                        mistake: 'Setting the seat too low so shoulders take over the press.',
+                        video: REF_VIDEOS.chest,
+                        searchQuery: 'chest press machine proper form'
+                    },
+                    {
+                        id: 'fri-2',
+                        name: 'Chin-Ups (Palms In) or Lat Pulldown',
+                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Bodyweight / Cable',
+                        sets: '3 sets × 8–10 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['lats'],
+                        secondary: ['biceps', 'rhomboids', 'forearms'],
+                        camera: 'back',
+                        why: 'Keeps your supinated (palms-facing-you) pull-up variation for 3 full sets to hit lower lats and pre-load biceps.',
+                        machineSetup: 'Shoulder-width underhand grip (use Lat Pulldown if hitting < 6 clean bodyweight reps).',
+                        formCues: [
+                            'Start from a full overhead stretch with chest lifted slightly.',
+                            'Drive elbows down toward your sides rather than curling just with wrists.',
+                            'Control the 2-second descent on every rep.'
+                        ],
+                        mistake: 'Kicking legs or stopping halfway down.',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'chin ups vs lat pulldown proper form'
+                    },
+                    {
+                        id: 'fri-3',
+                        name: 'Chest-Supported Row (Wide Grip)',
+                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Row Machine',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1–2 RIR • 90s rest',
+                        primary: ['rhomboids', 'traps'],
+                        secondary: ['rear_delts', 'lats'],
+                        camera: 'back',
+                        why: 'Complements Monday’s low cable row with a slightly higher elbow angle to build rear delts and upper-back posture.',
+                        machineSetup: 'Set chest pad so your torso rests comfortably and arms reach full stretch without hitting the stops.',
+                        formCues: [
+                            'Flare elbows ~45–60° out to emphasize upper back and rear delts.',
+                            'Squeeze shoulder blades together for 1 second at the top.',
+                            'Lower smoothly into a full scapular stretch.'
+                        ],
+                        mistake: 'Lifting your chest off the pad to yank heavy weight.',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'chest supported row machine proper form'
+                    },
+                    {
+                        id: 'fri-4',
+                        name: 'Dumbbell or Cable Lateral Raises',
+                        tag: 'New V-Taper Key', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Dumbbells / Cable',
+                        sets: '3 sets × 12–15 reps',
+                        effort: '0–1 RIR • 60s rest',
+                        primary: ['side_delts'],
+                        secondary: ['traps'],
+                        camera: 'angle',
+                        why: 'Lateral delts recover fast and respond best to 2×/week frequency for noticeable shoulder capping.',
+                        machineSetup: 'Stand tall with light-to-moderate dumbbells resting slightly in front of your thighs.',
+                        formCues: [
+                            'Sweep weights outward in a wide arc up to shoulder level.',
+                            'Keep pinkies level with or slightly below thumbs (do not pour the pitcher aggressively).',
+                            'Control the lowering phase all the way down.'
+                        ],
+                        mistake: 'Swinging hips to heave dumbbells past parallel.',
+                        video: REF_VIDEOS.shoulders,
+                        searchQuery: 'dumbbell lateral raise proper form jeff nippard'
+                    },
+                    {
+                        id: 'fri-5',
+                        name: 'Dumbbell Bicep Curls (Free Weights)',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Dumbbells',
+                        sets: '3 sets × 8–12 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['biceps'],
+                        secondary: ['brachialis', 'forearms'],
+                        camera: 'front',
+                        why: 'Kept your free-weight bicep curls, upgraded to 3 working sets (or on a slight incline bench for extra stretch).',
+                        machineSetup: 'Stand or sit on a 45–60° incline bench; keep elbows pinned slightly behind or at your ribs.',
+                        formCues: [
+                            'Curl with palms facing up without letting elbows drift forward.',
+                            'Squeeze hard at the top, then lower for 2–3 seconds to full elbow extension.',
+                            'Alternate or curl together with zero torso swing.'
+                        ],
+                        mistake: 'Rocking your lower back to get the dumbbells moving.',
+                        video: REF_VIDEOS.biceps,
+                        searchQuery: 'dumbbell bicep curl proper form'
+                    },
+                    {
+                        id: 'fri-6',
+                        name: 'Tricep Extension Machine (or Rope Pushdown)',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Machine / Cable',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['triceps'],
+                        secondary: [],
+                        camera: 'side',
+                        why: 'Kept your tricep extension machine and bumped to 3 full sets to match your bicep volume.',
+                        machineSetup: 'Keep upper arms locked onto the pad (or pinned to sides on cable pushdown).',
+                        formCues: [
+                            'Extend forearms all the way to full lockout and hold 1 beat.',
+                            'Allow elbows to bend deeply on the return so the triceps get stretched under load.',
+                            'Keep shoulders relaxed down, away from ears.'
+                        ],
+                        mistake: 'Only moving halfway back up, missing the stretched half of the rep.',
+                        video: REF_VIDEOS.triceps,
+                        searchQuery: 'tricep extension machine proper form'
+                    },
+                    {
+                        id: 'fri-7',
+                        name: 'Zone 2 Incline Treadmill Walk',
+                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        equipment: 'Treadmill',
+                        sets: '25–30 min steady',
+                        effort: 'Zone 2 (Conversational Pace)',
+                        primary: ['glute_maximus', 'calves'],
+                        secondary: ['quads', 'hamstrings'],
+                        camera: 'side',
+                        why: 'Finishes Friday with steady aerobic fat burn while leaving legs fresh for Sunday’s heavy posterior-chain work.',
+                        machineSetup: 'Brisk incline walk, hands off rails.',
+                        formCues: [
+                            'Maintain steady conversational breathing for the full 25–30 minutes.',
+                            'Keep stride natural and upright.'
+                        ],
+                        mistake: 'Going too fast into Zone 4/5 and spiking fatigue.',
+                        video: null,
+                        searchQuery: 'zone 2 incline walking calories burned'
+                    }
+                ]
+            },
+            sun: {
+                badge: 'Day 4 • Sunday',
+                title: 'Lower B — Posterior Chain, Calves & Core',
+                subtitle: 'Balances Wednesday’s squats with heavy hip hinging, calves, Captain’s Chair, and Zone 2.',
+                steps: [
+                    {
+                        id: 'sun-1',
+                        name: 'Romanian Deadlift (or Trap Bar Deadlift)',
+                        tag: 'New Mass & Burn Builder', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Dumbbells / Barbell',
+                        sets: '3 sets × 8–10 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['hamstrings', 'glute_maximus'],
+                        secondary: ['erector_spinae', 'traps', 'forearms'],
+                        camera: 'back',
+                        why: 'Your old routine had 0 hip-hinge work. RDLs build strong hamstrings/glutes and burn major energy without knee pounding.',
+                        machineSetup: 'Hold dumbbells or barbell at thighs, unlock knees slightly (~15° bend), and keep that knee angle fixed.',
+                        formCues: [
+                            'Push your hips straight back toward the wall behind you while keeping weights glued to your legs.',
+                            'Stop as soon as your hips stop moving back (mid-shin level) with a deep hamstring stretch.',
+                            'Drive hips forward aggressively to stand tall without leaning back at the top.'
+                        ],
+                        mistake: 'Rounding your lower back or turning it into a squat by bending knees too much.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'dumbbell romanian deadlift proper form'
+                    },
+                    {
+                        id: 'sun-2',
+                        name: 'Leg Press Machine (or Goblet Squat)',
+                        tag: '2×/Week Quad Hit', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Leg Press Machine',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1–2 RIR • 2 min rest',
+                        primary: ['quads'],
+                        secondary: ['glute_maximus', 'adductors'],
+                        camera: 'front',
+                        why: 'Gives your quads a safe, stable second weekly hit with zero spinal fatigue after RDLs.',
+                        machineSetup: 'Place feet shoulder-width in the middle-low zone of the sled; set safety stops so knees don’t smash your chest.',
+                        formCues: [
+                            'Lower the sled slowly until knees bend deep without your lower back peeling off the pad.',
+                            'Push evenly through midfoot and heels; stop just shy of snapping knees locked.',
+                            'Keep knees tracking straight over toes.'
+                        ],
+                        mistake: 'Letting your tailbone curl off the seat at the bottom.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'leg press proper form'
+                    },
+                    {
+                        id: 'sun-3',
+                        name: 'Seated Leg Curl (or Lying Curl)',
+                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Machine',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1 RIR • 90s rest',
+                        primary: ['hamstrings'],
+                        secondary: ['calves'],
+                        camera: 'back',
+                        why: 'Seated curls stretch the hamstrings more at the hip than lying curls, giving 2×/week complete hamstring growth.',
+                        machineSetup: 'Lock the thigh lap pad down tight so your legs cannot lift, and adjust backrest upright.',
+                        formCues: [
+                            'Pull heels down and back under the seat smoothly.',
+                            'Pause 1 second at full contraction.',
+                            'Return slowly over 3 seconds all the way to full straight-leg stretch.'
+                        ],
+                        mistake: 'Leaving the lap pad loose and slouching forward.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'seated leg curl proper form'
+                    },
+                    {
+                        id: 'sun-4',
+                        name: 'Standing or Seated Calf Raise',
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'Calf Machine',
+                        sets: '3 sets × 12–15 reps',
+                        effort: '0–1 RIR • 60s rest',
+                        primary: ['calves'],
+                        secondary: [],
+                        camera: 'back',
+                        why: 'Kept your calf raises ("calf curls") and added a bottom pause — calves respond poorly to bouncing reps.',
+                        machineSetup: 'Place balls of feet firmly on the block so heels can drop deep below parallel.',
+                        formCues: [
+                            'Pause for a full 2 seconds in the bottom stretch on every single rep.',
+                            'Drive up onto your big toes as high as possible and hold 1 second.',
+                            'Keep knees straight on standing raises (hits gastrocnemius).'
+                        ],
+                        mistake: 'Bouncing rapidly through the bottom using Achilles tendon elasticity.',
+                        video: REF_VIDEOS.legs,
+                        searchQuery: 'standing calf raise proper form stretch'
+                    },
+                    {
+                        id: 'sun-5',
+                        name: "Captain's Chair Knee / Leg Raises",
+                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: "Captain's Chair",
+                        sets: '3 sets × 12–15 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['abs'],
+                        secondary: ['obliques', 'forearms'],
+                        camera: 'front',
+                        why: 'Kept your Captain’s Chair move at the end of Sunday, focused on curling the pelvis up rather than swinging legs.',
+                        machineSetup: 'Press forearms down hard into pads so shoulders stay packed down; press lower back flat against the backrest.',
+                        formCues: [
+                            'Instead of just lifting knees to 90°, curl your tailbone/pelvis slightly up toward your ribs.',
+                            'Lower legs slowly with zero swinging momentum.',
+                            'Bend knees if hamstrings limit range, or straighten legs to progress.'
+                        ],
+                        mistake: 'Swinging legs up and down using only hip flexors while back stays flat.',
+                        video: REF_VIDEOS.abs,
+                        searchQuery: 'captains chair leg raise pelvic tilt form'
+                    },
+                    {
+                        id: 'sun-6',
+                        name: 'Zone 2 Incline Treadmill Walk',
+                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        equipment: 'Treadmill',
+                        sets: '30–35 min steady',
+                        effort: 'Zone 2 (Conversational Pace)',
+                        primary: ['glute_maximus', 'calves'],
+                        secondary: ['quads', 'hamstrings'],
+                        camera: 'side',
+                        why: 'Slightly longer Sunday Zone 2 session boosts weekly fat loss without cutting into Monday’s upper-body energy.',
+                        machineSetup: 'Steady incline walk at conversational pace, hands off rails.',
+                        formCues: [
+                            'Keep steady rhythm for 30–35 minutes; listen to a podcast or audiobook.',
+                            'Track total weekly steps (aim 8,000–10,000/day average) alongside these 4 sessions.'
+                        ],
+                        mistake: 'Grabbing the rails or skipping hydration afterward.',
+                        video: null,
+                        searchQuery: 'zone 2 cardio fat oxidation incline walking'
+                    }
+                ]
+            }
+        };
+
+        // --- State ---
+        let currentDay = 'mon';
+        let activeStepIndex = 0;
+        let showDayHeatmap = false;
+        let completedSteps = JSON.parse(localStorage.getItem('boulos_workout_done_v1') || '{}');
+
+        // --- Three.js Scene Variables ---
+        let scene, camera, renderer, controls;
+        let raycaster, mouse;
+        const muscleMeshes = [];
+        let hoveredMesh = null;
+        let pointerDownPos = { x: 0, y: 0 };
+
+        // Smooth camera interpolation
+        let camAnim = null;
+        const CAM_PRESETS = {
+            front: { pos: new THREE.Vector3(0, 1.15, 6.2), target: new THREE.Vector3(0, 0.95, 0) },
+            angle: { pos: new THREE.Vector3(3.9, 1.35, 4.9), target: new THREE.Vector3(0, 0.95, 0) },
+            side:  { pos: new THREE.Vector3(6.1, 1.10, 0.1), target: new THREE.Vector3(0, 0.95, 0) },
+            back:  { pos: new THREE.Vector3(0, 1.15, -6.2), target: new THREE.Vector3(0, 0.95, 0) }
+        };
+
+        function isMobile() {
+            return window.innerWidth < 768;
+        }
+
+        function getPreset(presetName) {
+            const p = CAM_PRESETS[presetName] || CAM_PRESETS.front;
+            const pos = p.pos.clone();
+            const target = p.target.clone();
+            if (isMobile()) {
+                pos.multiplyScalar(1.48);
+                pos.y = 1.65;
+                target.y = 1.35;
+            }
+            return { pos, target };
+        }
+
+        function initThree() {
+            scene = new THREE.Scene();
+            const container = document.getElementById('canvas-container');
+            const w = container.clientWidth || window.innerWidth;
+            const h = container.clientHeight || window.innerHeight;
+
+            camera = new THREE.PerspectiveCamera(44, w / h, 0.1, 100);
+            const initCam = getPreset('front');
+            camera.position.copy(initCam.pos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.08;
+            container.appendChild(renderer.domElement);
+
+            // Light-mode studio lighting rig
+            scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+            const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.15);
+            keyLight.position.set(-3.5, 7.5, 5.5);
+            scene.add(keyLight);
+            const fillLight = new THREE.DirectionalLight(0xe0edff, 0.65);
+            fillLight.position.set(5, 3, 4);
+            scene.add(fillLight);
+            const rimLight = new THREE.DirectionalLight(0xc7d2fe, 0.7);
+            rimLight.position.set(0, 3, -7);
+            scene.add(rimLight);
+            const bounceLight = new THREE.DirectionalLight(0xf1f5f9, 0.35);
+            bounceLight.position.set(0, -6, 2);
+            scene.add(bounceLight);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.06;
+            controls.minDistance = 3.2;
+            controls.maxDistance = 12;
+            controls.target.copy(initCam.target);
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            createStudioPedestal();
+            createBodyBase();
+            createMuscles();
+
+            window.addEventListener('resize', onWindowResize);
+            const dom = renderer.domElement;
+            dom.addEventListener('mousemove', onMouseMove);
+            dom.addEventListener('pointerdown', (e) => { pointerDownPos = { x: e.clientX, y: e.clientY }; });
+            dom.addEventListener('pointerup', onPointerUp);
+
+            animate();
+        }
+
+        function createStudioPedestal() {
+            const ringGeo = new THREE.RingGeometry(0.95, 1.38, 64);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xcbd5e1, side: THREE.DoubleSide, transparent: true, opacity: 0.55 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = -1.82;
+            scene.add(ring);
+
+            const discGeo = new THREE.CircleGeometry(0.94, 64);
+            const discMat = new THREE.MeshBasicMaterial({ color: 0xe2e8f0, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
+            const disc = new THREE.Mesh(discGeo, discMat);
+            disc.rotation.x = -Math.PI / 2;
+            disc.position.y = -1.825;
+            scene.add(disc);
+        }
+
+        function createBodyBase() {
+            const skinMat = new THREE.MeshPhysicalMaterial({
+                color: 0xd6c7be,
+                transparent: true,
+                opacity: 0.28,
+                roughness: 0.72,
+                metalness: 0.0,
+                depthWrite: false
+            });
+            const add = (geo, pos, scale) => {
+                const m = new THREE.Mesh(geo, skinMat);
+                m.position.set(...pos);
+                if (scale) m.scale.set(...scale);
+                scene.add(m);
+            };
+            add(new THREE.SphereGeometry(0.32, 32, 24), [0, 2.86, 0], [1, 1.22, 0.9]);
+            add(new THREE.CylinderGeometry(0.13, 0.17, 0.30, 16), [0, 2.57, 0]);
+            const torsoPts = [
+                new THREE.Vector2(0.47, 0),
+                new THREE.Vector2(0.52, 0.20),
+                new THREE.Vector2(0.37, 0.55),
+                new THREE.Vector2(0.42, 0.82),
+                new THREE.Vector2(0.56, 1.08),
+                new THREE.Vector2(0.65, 1.35),
+                new THREE.Vector2(0.55, 1.58),
+                new THREE.Vector2(0.18, 1.68),
+            ];
+            const torso = new THREE.Mesh(new THREE.LatheGeometry(torsoPts, 32), skinMat);
+            torso.position.set(0, 0.52, 0);
+            torso.scale.set(1, 1, 0.60);
+            scene.add(torso);
+            add(new THREE.SphereGeometry(0.52, 20, 14), [0, 0.52, 0], [1, 0.42, 0.58]);
+            [-1, 1].forEach(s => {
+                add(new THREE.CylinderGeometry(0.145, 0.115, 0.82, 16), [s * 1.12, 1.74, 0]);
+                add(new THREE.SphereGeometry(0.115, 12, 8), [s * 1.12, 1.33, 0]);
+                add(new THREE.CylinderGeometry(0.11, 0.082, 0.78, 16), [s * 1.12, 0.92, 0]);
+                add(new THREE.SphereGeometry(0.08, 10, 6), [s * 1.12, 0.52, 0]);
+            });
+            [-0.42, 0.42].forEach(s => {
+                add(new THREE.CylinderGeometry(0.26, 0.21, 1.05, 20), [s, -0.18, 0]);
+                add(new THREE.SphereGeometry(0.178, 14, 10), [s, -0.73, 0]);
+                add(new THREE.CylinderGeometry(0.16, 0.105, 0.92, 16), [s, -1.22, 0]);
+                add(new THREE.SphereGeometry(0.088, 10, 6), [s, -1.71, 0]);
+            });
+        }
+
+        function createMuscles() {
+            const tube = (pts, radius, segs) => {
+                const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+                return new THREE.TubeGeometry(curve, segs || 22, radius, 12, false);
+            };
+            const add = (geo, baseColor, id, pos, rot, scale) => {
+                const mat = new THREE.MeshPhysicalMaterial({
+                    color: baseColor,
+                    transparent: true,
+                    opacity: 0.78,
+                    roughness: 0.36,
+                    metalness: 0.04,
+                    clearcoat: 0.4,
+                    clearcoatRoughness: 0.22,
+                });
+                const m = new THREE.Mesh(geo, mat);
+                m.position.set(...pos);
+                if (rot) m.rotation.set(...rot);
+                if (scale) m.scale.set(...scale);
+                m.userData = { muscle: id, baseColor };
+                scene.add(m);
+                muscleMeshes.push(m);
+            };
+
+            // Chest
+            [-1, 1].forEach(s => {
+                add(new THREE.SphereGeometry(1, 28, 20), 0xef4444, 'upper_chest', [s * 0.30, 2.10, 0.44], [0, 0, s * 0.15], [0.40, 0.22, 0.20]);
+                add(new THREE.SphereGeometry(1, 28, 20), 0xdc2626, 'middle_chest', [s * 0.32, 1.73, 0.45], [0, 0, s * 0.10], [0.52, 0.30, 0.24]);
+                add(new THREE.SphereGeometry(1, 28, 20), 0xb91c1c, 'lower_chest', [s * 0.27, 1.36, 0.43], [s * -0.18, 0, s * 0.08], [0.42, 0.19, 0.18]);
+            });
+
+            // Back
+            [-1, 1].forEach(s => {
+                add(tube([[s * 0.92, 2.04, -0.35], [s * 0.80, 1.70, -0.40], [s * 0.65, 1.40, -0.42]], 0.19), 0xf97316, 'upper_lats', [0, 0, 0]);
+                add(tube([[s * 0.60, 1.35, -0.42], [s * 0.45, 1.00, -0.42], [s * 0.30, 0.72, -0.40]], 0.145), 0xf59e0b, 'lower_lats', [0, 0, 0]);
+                add(new THREE.SphereGeometry(1, 18, 14), 0xeab308, 'rhomboids', [s * 0.22, 1.98, -0.44], null, [0.22, 0.30, 0.10]);
+                add(tube([[s * 0.08, 2.48, -0.22], [s * 0.28, 2.40, -0.28], [s * 0.52, 2.24, -0.27]], 0.115), 0x0f766e, 'traps_upper', [0, 0, 0]);
+                add(tube([[s * 0.08, 2.04, -0.44], [s * 0.32, 2.02, -0.46], [s * 0.56, 1.98, -0.40]], 0.095), 0x14b8a6, 'traps_middle', [0, 0, 0]);
+                add(tube([[s * 0.20, 1.60, -0.40], [s * 0.22, 1.15, -0.42], [s * 0.22, 0.72, -0.42]], 0.115), 0x0284c7, 'erector_spinae', [0, 0, 0]);
+            });
+
+            // Shoulders
+            [-1, 1].forEach(s => {
+                add(new THREE.SphereGeometry(1, 20, 16), 0x7c3aed, 'front_delts', [s * 1.06, 2.25, 0.19], null, [0.25, 0.30, 0.22]);
+                add(new THREE.SphereGeometry(1, 20, 16), 0x8b5cf6, 'side_delts', [s * 1.22, 2.20, -0.02], null, [0.27, 0.34, 0.25]);
+                add(new THREE.SphereGeometry(1, 20, 16), 0xa78bfa, 'rear_delts', [s * 1.08, 2.18, -0.23], null, [0.23, 0.26, 0.21]);
+            });
+
+            // Arms
+            [-1, 1].forEach(s => {
+                add(tube([[s * 1.05, 2.05, 0.15], [s * 1.12, 1.82, 0.18], [s * 1.15, 1.60, 0.16], [s * 1.12, 1.38, 0.10]], 0.10), 0x0284c7, 'bicep_long', [0, 0, 0]);
+                add(tube([[s * 1.00, 2.00, 0.12], [s * 1.05, 1.78, 0.14], [s * 1.08, 1.58, 0.12], [s * 1.06, 1.40, 0.08]], 0.088), 0x0ea5e9, 'bicep_short', [0, 0, 0]);
+                add(tube([[s * 1.10, 1.60, 0.07], [s * 1.12, 1.44, 0.04], [s * 1.12, 1.32, 0.01]], 0.088), 0x38bdf8, 'brachialis', [0, 0, 0]);
+                add(tube([[s * 1.02, 2.08, -0.18], [s * 1.08, 1.80, -0.21], [s * 1.12, 1.58, -0.19], [s * 1.10, 1.36, -0.12]], 0.12), 0x6d28d9, 'tricep_long', [0, 0, 0]);
+                add(tube([[s * 1.15, 1.95, -0.10], [s * 1.18, 1.72, -0.12], [s * 1.18, 1.50, -0.10], [s * 1.14, 1.36, -0.06]], 0.09), 0x7c3aed, 'tricep_lateral', [0, 0, 0]);
+                add(new THREE.SphereGeometry(1, 16, 12), 0x9333ea, 'tricep_medial', [s * 1.12, 1.40, -0.09], null, [0.14, 0.19, 0.10]);
+                add(tube([[s * 1.12, 1.30, 0.02], [s * 1.12, 1.05, 0.00], [s * 1.12, 0.80, -0.01], [s * 1.10, 0.55, 0.00]], 0.10, 16), 0xbe185d, 'forearms', [0, 0, 0]);
+            });
+
+            // Core
+            const abColors = [0x10b981, 0x059669, 0x047857];
+            const abIds = ['upper_abs', 'upper_abs', 'lower_abs'];
+            [-0.21, 0.21].forEach(x => {
+                [0, 1, 2].forEach(row => {
+                    add(new THREE.SphereGeometry(1, 16, 14), abColors[row], abIds[row], [x, 1.08 - row * 0.26, 0.44], null, [0.18, 0.22, 0.13]);
+                });
+            });
+            [-1, 1].forEach(s => {
+                add(tube([[s * 0.55, 1.32, 0.32], [s * 0.62, 1.06, 0.30], [s * 0.65, 0.80, 0.26], [s * 0.60, 0.56, 0.22]], 0.12), 0x34d399, 'obliques', [0, 0, 0]);
+                [0, 1, 2].forEach(i => {
+                    add(new THREE.SphereGeometry(1, 12, 8), 0x6ee7b7, 'serratus', [s * 0.78, 1.52 - i * 0.22, 0.32 - i * 0.02], [0, 0, s * 0.3], [0.10, 0.22, 0.10]);
+                });
+            });
+
+            // Legs + Adductors (new!)
+            [-1, 1].forEach(s => {
+                add(tube([[s * 0.44, 0.28, 0.18], [s * 0.51, 0.00, 0.20], [s * 0.52, -0.28, 0.18], [s * 0.48, -0.55, 0.14]], 0.20), 0x0284c7, 'quads_vastus_lateralis', [0, 0, 0]);
+                add(tube([[s * 0.30, 0.05, 0.18], [s * 0.28, -0.24, 0.18], [s * 0.25, -0.50, 0.16]], 0.155), 0x0ea5e9, 'quads_vastus_medialis', [0, 0, 0]);
+                add(tube([[s * 0.38, 0.32, 0.22], [s * 0.38, 0.02, 0.22], [s * 0.38, -0.28, 0.20], [s * 0.38, -0.58, 0.16]], 0.165), 0x38bdf8, 'quads_rectus_femoris', [0, 0, 0]);
+                // Adductors (inner thigh)
+                add(tube([[s * 0.18, 0.30, 0.02], [s * 0.22, 0.06, 0.04], [s * 0.25, -0.22, 0.04]], 0.13), 0x06b6d4, 'adductors', [0, 0, 0]);
+                // Hamstrings
+                add(tube([[s * 0.42, 0.26, -0.18], [s * 0.45, -0.02, -0.21], [s * 0.46, -0.30, -0.20], [s * 0.42, -0.56, -0.16]], 0.165), 0x7c3aed, 'hamstring_bicep_femoris', [0, 0, 0]);
+                add(tube([[s * 0.28, 0.22, -0.21], [s * 0.28, -0.05, -0.22], [s * 0.28, -0.33, -0.21], [s * 0.25, -0.56, -0.17]], 0.135), 0x8b5cf6, 'hamstring_semitendinosus', [0, 0, 0]);
+                // Calves
+                add(new THREE.SphereGeometry(1, 20, 16), 0xe11d48, 'calves_gastrocnemius', [s * 0.34, -1.02, -0.06], null, [0.14, 0.28, 0.17]);
+                add(new THREE.SphereGeometry(1, 20, 16), 0xe11d48, 'calves_gastrocnemius', [s * 0.43, -1.05, -0.04], null, [0.13, 0.26, 0.16]);
+                add(new THREE.SphereGeometry(1, 16, 12), 0xf43f5e, 'calves_soleus', [s * 0.38, -1.36, -0.10], null, [0.16, 0.30, 0.12]);
+            });
+
+            // Glutes
+            [-1, 1].forEach(s => {
+                add(new THREE.SphereGeometry(1, 24, 18), 0xec4899, 'glute_maximus', [s * 0.38, 0.22, -0.30], null, [0.40, 0.46, 0.36]);
+                add(new THREE.SphereGeometry(1, 20, 16), 0xf59e0b, 'glute_medius', [s * 0.58, 0.52, -0.20], null, [0.27, 0.29, 0.22]);
+            });
+        }
+
+        function setCameraPreset(presetName) {
+            const p = getPreset(presetName);
+            camAnim = {
+                startPos: camera.position.clone(),
+                endPos: p.pos,
+                startTarget: controls.target.clone(),
+                endTarget: p.target,
+                t: 0
+            };
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            const w = container.clientWidth || window.innerWidth;
+            const h = container.clientHeight || window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+
+        function updateMouseNDC(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        }
+
+        function onMouseMove(event) {
+            updateMouseNDC(event);
+            raycaster.setFromCamera(mouse, camera);
+            const visibleMeshes = muscleMeshes.filter(m => m.visible);
+            const intersects = raycaster.intersectObjects(visibleMeshes);
+            const tooltip = document.getElementById('muscle-tooltip');
+
+            if (intersects.length > 0) {
+                const m = intersects[0].object;
+                const resolvedId = muscleAliases[m.userData.muscle] || m.userData.muscle;
+                const info = muscleData[resolvedId];
+                hoveredMesh = m;
+                renderer.domElement.style.cursor = 'pointer';
+                if (info) {
+                    tooltip.textContent = info.name;
+                    tooltip.style.left = (event.clientX + 14) + 'px';
+                    tooltip.style.top = (event.clientY - 12) + 'px';
+                    tooltip.style.opacity = '1';
+                }
+            } else {
+                hoveredMesh = null;
+                renderer.domElement.style.cursor = 'grab';
+                tooltip.style.opacity = '0';
+            }
+        }
+
+        function onPointerUp(event) {
+            const dx = event.clientX - pointerDownPos.x;
+            const dy = event.clientY - pointerDownPos.y;
+            if (Math.hypot(dx, dy) > 5) return; // Ignore orbit drags
+
+            updateMouseNDC(event);
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(muscleMeshes.filter(m => m.visible));
+            if (intersects.length > 0) {
+                const rawId = intersects[0].object.userData.muscle;
+                const resolvedId = muscleAliases[rawId] || rawId;
+                highlightMuscles([resolvedId], []);
+                openMusclePanel(resolvedId);
+            }
+        }
+
+        function highlightMuscles(primaryIds = [], secondaryIds = [], useOriginalColors = false) {
+            const hasSelection = primaryIds.length > 0 || secondaryIds.length > 0;
+            muscleMeshes.forEach(m => {
+                m.visible = true;
+                const rawId = m.userData.muscle;
+                const resolvedId = muscleAliases[rawId] || rawId;
+                const isPrimary = primaryIds.includes(resolvedId);
+                const isSecondary = !isPrimary && secondaryIds.includes(resolvedId);
+
+                if (!hasSelection || useOriginalColors) {
+                    m.material.color.setHex(m.userData.baseColor);
+                    m.material.opacity = hasSelection ? (isPrimary ? 1.0 : isSecondary ? 0.72 : 0.14) : 0.80;
+                    m.material.emissive.setHex(isPrimary ? m.userData.baseColor : 0x000000);
+                    m.material.emissiveIntensity = isPrimary ? 0.25 : 0;
+                } else if (isPrimary) {
+                    m.material.color.setHex(0x2563eb);
+                    m.material.opacity = 1.0;
+                    m.material.emissive.setHex(0x1d4ed8);
+                    m.material.emissiveIntensity = 0.28;
+                } else if (isSecondary) {
+                    m.material.color.setHex(0xf59e0b);
+                    m.material.opacity = 0.88;
+                    m.material.emissive.setHex(0xd97706);
+                    m.material.emissiveIntensity = 0.15;
+                } else {
+                    m.material.color.setHex(0x94a3b8);
+                    m.material.opacity = 0.14;
+                    m.material.emissive.setHex(0x000000);
+                    m.material.emissiveIntensity = 0;
+                }
+            });
+        }
+
+        function filterMuscles(group) {
+            muscleMeshes.forEach(mesh => {
+                const rawId = mesh.userData.muscle;
+                const resolvedId = muscleAliases[rawId] || rawId;
+                const muscleGroup = muscleData[resolvedId]?.group;
+                mesh.visible = (group === 'all' || muscleGroup === group);
+                mesh.material.color.setHex(mesh.userData.baseColor);
+                mesh.material.opacity = 0.82;
+                mesh.material.emissive.setHex(0x000000);
+            });
+        }
+
+        // --- UI Rendering ---
+        function selectDay(dayKey) {
+            currentDay = dayKey;
+            showDayHeatmap = false;
+            document.querySelectorAll('.day-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.day === dayKey);
+            });
+
+            const dayPanel = document.getElementById('day-panel');
+            const explorePanel = document.getElementById('explore-panel');
+            const legend = document.getElementById('highlight-legend');
+
+            if (dayKey === 'explore') {
+                dayPanel.classList.add('hidden');
+                explorePanel.classList.remove('hidden');
+                legend.classList.add('hidden');
+                filterMuscles('all');
+                closeInfoPanel();
+                setCameraPreset('front');
+                return;
+            }
+
+            dayPanel.classList.remove('hidden');
+            explorePanel.classList.add('hidden');
+            legend.classList.remove('hidden');
+            renderDayPlan();
+            selectStep(0, isMobile());
+        }
+
+        function renderDayPlan() {
+            const plan = workoutPlan[currentDay];
+            if (!plan) return;
+
+            document.getElementById('day-badge').textContent = plan.badge;
+            document.getElementById('day-title').textContent = plan.title;
+            document.getElementById('day-subtitle').textContent = plan.subtitle;
+
+            const doneCount = plan.steps.filter(s => completedSteps[s.id]).length;
+            const total = plan.steps.length;
+            document.getElementById('day-progress-bar').style.width = `${total ? Math.round((doneCount / total) * 100) : 0}%`;
+            document.getElementById('day-progress-text').textContent = `${doneCount}/${total}`;
+
+            const heatmapBtn = document.getElementById('heatmap-btn');
+            heatmapBtn.className = showDayHeatmap
+                ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-600 text-white border border-blue-600 transition-colors'
+                : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors';
+
+            const listEl = document.getElementById('sequence-list');
+            listEl.innerHTML = plan.steps.map((step, idx) => {
+                const isDone = !!completedSteps[step.id];
+                const isActive = !showDayHeatmap && idx === activeStepIndex;
+                return `
+                <div class="seq-item rounded-xl border p-3 cursor-pointer ${isActive ? 'active' : 'border-slate-200 bg-white'}" onclick="selectStep(${idx})">
+                    <div class="flex items-start gap-2.5">
+                        <button onclick="event.stopPropagation(); toggleDone('${step.id}')" title="Mark done"
+                            class="mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 bg-white text-transparent hover:border-emerald-500'}">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Step ${idx + 1}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${step.tagStyle}">${step.tag}</span>
+                            </div>
+                            <div class="text-xs font-bold text-slate-900 mt-0.5 ${isDone ? 'line-through text-slate-400' : ''}">${step.name}</div>
+                            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                                <span class="font-semibold text-slate-700">${step.sets}</span>
+                                <span>•</span>
+                                <span>${step.equipment}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function selectStep(idx, keepListOnMobile = false) {
+            const plan = workoutPlan[currentDay];
+            if (!plan || !plan.steps[idx]) return;
+            showDayHeatmap = false;
+            activeStepIndex = idx;
+            const step = plan.steps[idx];
+
+            renderDayPlan();
+            highlightMuscles(step.primary, step.secondary, false);
+            setCameraPreset(step.camera || 'front');
+            openStepPanel(step, idx, plan.steps.length, !keepListOnMobile);
+        }
+
+        function toggleDayHeatmap() {
+            const plan = workoutPlan[currentDay];
+            if (!plan) return;
+            showDayHeatmap = !showDayHeatmap;
+            if (!showDayHeatmap) {
+                selectStep(activeStepIndex);
+                return;
+            }
+            const allPrimaries = [...new Set(plan.steps.flatMap(s => s.primary))];
+            const allSecondaries = [...new Set(plan.steps.flatMap(s => s.secondary))].filter(id => !allPrimaries.includes(id));
+            renderDayPlan();
+            highlightMuscles(allPrimaries, allSecondaries, false);
+            setCameraPreset('angle');
+        }
+
+        function toggleDone(stepId) {
+            completedSteps[stepId] = !completedSteps[stepId];
+            localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
+            renderDayPlan();
+            if (currentDay !== 'explore') {
+                const plan = workoutPlan[currentDay];
+                const step = plan?.steps[activeStepIndex];
+                if (step && step.id === stepId) {
+                    updateDoneButton(stepId);
+                }
+            }
+        }
+
+        function updateDoneButton(stepId) {
+            const btn = document.getElementById('toggle-done-btn');
+            const isDone = !!completedSteps[stepId];
+            btn.textContent = isDone ? 'Completed' : 'Mark Complete';
+            btn.className = isDone
+                ? 'flex-1 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold transition-colors'
+                : 'flex-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors';
+        }
+
+        function showInfoPanel() {
+            const el = document.getElementById('info-panel');
+            el.classList.remove('md:translate-x-[110%]');
+            el.classList.add('mobile-open');
+        }
+
+        function openStepPanel(step, idx, total, shouldShow = true) {
+            document.getElementById('panel-eyebrow').textContent = `${workoutPlan[currentDay].badge} • Step ${idx + 1} of ${total}`;
+            document.getElementById('panel-title').textContent = step.name;
+            document.getElementById('panel-subtitle').textContent = `${step.sets} • ${step.effort}`;
+
+            const primaryNames = step.primary.map(id => muscleData[id]?.name || id).join(', ');
+            const secondaryNames = step.secondary.map(id => muscleData[id]?.name || id).join(', ');
+            const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(step.searchQuery)}`;
+
+            let videoHtml = '';
+            if (step.video) {
+                const thumb = `https://img.youtube.com/vi/${step.video.vid}/hqdefault.jpg`;
+                videoHtml = `
+                <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                    <a href="${step.video.url}" target="_blank" rel="noopener noreferrer" class="block relative group">
+                        <img src="${thumb}" alt="${step.video.title}" class="w-full block bg-slate-100" style="aspect-ratio:16/9;object-fit:cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-900/25 group-hover:bg-slate-900/15 transition-colors">
+                            <span class="w-11 h-11 flex items-center justify-center bg-red-600 rounded-full shadow-lg group-hover:scale-105 transition-transform">
+                                <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                    <div class="p-2.5 flex items-center justify-between gap-2">
+                        <span class="text-xs font-semibold text-slate-800 truncate">${step.video.title}</span>
+                        <a href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-blue-600 hover:underline whitespace-nowrap">Exact Form Demo →</a>
+                    </div>
+                </div>`;
+            } else {
+                videoHtml = `
+                <a href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div>
+                        <div class="text-xs font-bold text-slate-900">Watch Zone 2 Incline Guide</div>
+                        <div class="text-[11px] text-slate-500">Opens YouTube search for proper Zone 2 setup</div>
+                    </div>
+                    <span class="text-xs font-semibold text-blue-600">Open →</span>
+                </a>`;
+            }
+
+            document.getElementById('panel-content').innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Primary Target</div>
+                        <div class="text-xs font-semibold text-slate-900 mt-0.5">${primaryNames}</div>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Secondary</div>
+                        <div class="text-xs font-semibold text-slate-900 mt-0.5">${secondaryNames || 'Isolation'}</div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Why It’s Here</div>
+                    <p class="text-xs text-slate-700 mt-1 leading-relaxed">${step.why}</p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Machine / Setup</div>
+                    <p class="text-xs text-slate-700 leading-relaxed">${step.machineSetup}</p>
+                    <div class="pt-2 border-t border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">Form Cues</div>
+                    <ul class="space-y-1.5 text-xs text-slate-700">
+                        ${step.formCues.map(c => `<li class="flex gap-2"><span class="text-blue-600 font-bold">•</span><span>${c}</span></li>`).join('')}
+                    </ul>
+                    <div class="pt-2 border-t border-slate-100 text-xs text-rose-700 bg-rose-50/70 rounded-lg p-2">
+                        <strong>Avoid:</strong> ${step.mistake}
+                    </div>
+                </div>
+
+                ${videoHtml}
+            `;
+
+            const footer = document.getElementById('panel-footer');
+            footer.classList.remove('hidden');
+            document.getElementById('prev-step-btn').disabled = idx === 0;
+            document.getElementById('prev-step-btn').classList.toggle('opacity-40', idx === 0);
+            document.getElementById('next-step-btn').disabled = idx === total - 1;
+            document.getElementById('next-step-btn').classList.toggle('opacity-40', idx === total - 1);
+            updateDoneButton(step.id);
+
+            if (shouldShow) {
+                showInfoPanel();
+            } else {
+                closeInfoPanel();
+            }
+        }
+
+        function openMusclePanel(muscleId) {
+            const data = muscleData[muscleId];
+            if (!data) return;
+
+            document.getElementById('panel-eyebrow').textContent = `Anatomy • ${data.group}`;
+            document.getElementById('panel-title').textContent = data.name;
+            document.getElementById('panel-subtitle').textContent = data.description;
+            document.getElementById('panel-footer').classList.add('hidden');
+
+            const v = data.video;
+            const thumb = v ? `https://img.youtube.com/vi/${v.vid}/hqdefault.jpg` : '';
+            document.getElementById('panel-content').innerHTML = `
+                <div class="space-y-2">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Best Machines &amp; Movements</div>
+                    ${data.machines.map(m => {
+                        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(m + ' proper form')}`;
+                        return `
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                            <span class="text-xs font-semibold text-slate-900">${m}</span>
+                            <span class="text-[11px] font-semibold text-blue-600">Form Video →</span>
+                        </a>`;
+                    }).join('')}
+                </div>
+                ${v ? `
+                <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                    <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="block relative group">
+                        <img src="${thumb}" alt="${v.title}" class="w-full block bg-slate-100" style="aspect-ratio:16/9;object-fit:cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-900/25 group-hover:bg-slate-900/15 transition-colors">
+                            <span class="w-11 h-11 flex items-center justify-center bg-red-600 rounded-full shadow-lg group-hover:scale-105 transition-transform">
+                                <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                    <div class="p-2.5 text-xs font-semibold text-slate-800">${v.title}</div>
+                </div>` : ''}
+            `;
+            showInfoPanel();
+        }
+
+        function closeInfoPanel() {
+            const el = document.getElementById('info-panel');
+            el.classList.add('md:translate-x-[110%]');
+            el.classList.remove('mobile-open');
+            if (currentDay === 'explore') {
+                highlightMuscles([], [], true);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (camAnim) {
+                camAnim.t = Math.min(1, camAnim.t + 0.08);
+                const ease = 1 - Math.pow(1 - camAnim.t, 3);
+                camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, ease);
+                controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, ease);
+                if (camAnim.t >= 1) camAnim = null;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Event Bindings ---
+        document.querySelectorAll('.day-tab').forEach(btn => {
+            btn.addEventListener('click', () => selectDay(btn.dataset.day));
+        });
+        document.getElementById('heatmap-btn').addEventListener('click', toggleDayHeatmap);
+        document.getElementById('close-panel-btn').addEventListener('click', closeInfoPanel);
+        document.getElementById('prev-step-btn').addEventListener('click', () => selectStep(activeStepIndex - 1));
+        document.getElementById('next-step-btn').addEventListener('click', () => selectStep(activeStepIndex + 1));
+        document.getElementById('toggle-done-btn').addEventListener('click', () => {
+            const step = workoutPlan[currentDay]?.steps[activeStepIndex];
+            if (step) toggleDone(step.id);
+        });
+        document.getElementById('reset-progress-btn').addEventListener('click', () => {
+            const plan = workoutPlan[currentDay];
+            if (!plan) return;
+            plan.steps.forEach(s => delete completedSteps[s.id]);
+            localStorage.setItem('boulos_workout_done_v1', JSON.stringify(completedSteps));
+            renderDayPlan();
+            updateDoneButton(plan.steps[activeStepIndex].id);
+        });
+
+        // Camera buttons
+        document.getElementById('front-view').addEventListener('click', () => setCameraPreset('front'));
+        document.getElementById('angle-view').addEventListener('click', () => setCameraPreset('angle'));
+        document.getElementById('side-view').addEventListener('click', () => setCameraPreset('side'));
+        document.getElementById('back-view').addEventListener('click', () => setCameraPreset('back'));
+
+        // Explore muscle filters
+        document.querySelectorAll('.muscle-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.muscle-filter').forEach(b => {
+                    b.className = 'muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors';
+                });
+                btn.className = 'muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white transition-colors';
+                filterMuscles(btn.dataset.group);
+            });
+        });
+
+        // Routine Audit Modal
+        const auditModal = document.getElementById('audit-modal');
+        document.getElementById('open-audit-btn').addEventListener('click', () => {
+            auditModal.classList.remove('hidden');
+            auditModal.classList.add('flex');
+        });
+        document.getElementById('close-audit-btn').addEventListener('click', () => {
+            auditModal.classList.add('hidden');
+            auditModal.classList.remove('flex');
+        });
+        auditModal.addEventListener('click', (e) => {
+            if (e.target === auditModal) {
+                auditModal.classList.add('hidden');
+                auditModal.classList.remove('flex');
+            }
+        });
+
+        initThree();
+        selectDay('mon');
+    </script>
+</body>
+</html>
