@@ -166,6 +166,7 @@
             <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="wed">Wed · Lower A</button>
             <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="fri">Fri · Upper B</button>
             <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="sun">Sun · Lower B</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="posture">Posture &amp; Neck</button>
         </nav>
     </header>
 
@@ -203,6 +204,7 @@
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white transition-colors" data-group="all">Show All</button>
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="chest">Chest</button>
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="back">Back</button>
+                <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="neck">Neck &amp; Posture</button>
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="shoulders">Shoulders</button>
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="arms">Arms</button>
                 <button class="muscle-filter shrink-0 md:w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" data-group="core">Core</button>
@@ -338,6 +340,14 @@
                         <li><strong>Nutrition Anchor:</strong> Pair this with a 10–20% calorie deficit and 0.8–1.0 g protein/lb daily.</li>
                     </ul>
                 </div>
+                <div class="p-3.5 rounded-xl bg-indigo-50 border border-indigo-200">
+                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-1.5">Planet Fitness San Jose + Hunch &amp; Neck Plan</div>
+                    <ul class="space-y-1.5 text-xs text-slate-700">
+                        <li><strong>Planet Fitness covers 100% of this routine:</strong> San Jose clubs have Smith Machines, Dumbbells up to 75 lb, Cable Towers (Face Pulls/Rows/Crunches), Matrix/Hammer machines, Reverse Pec Deck, Foam Rollers, Treadmills, and Stair Steppers.</li>
+                        <li><strong>When 24 Hour Fitness helps later:</strong> Only if you pass 75 lb DBs per hand on RDLs or want free Olympic barbells / Trap Bars / loose 5–10 lb plates.</li>
+                        <li><strong>Fix Hunch + Thicker Neck:</strong> Added 2-min Thoracic Foam Roller + Wall Angels warm-ups, Cable Face Pulls, Reverse Pec Deck + Shrugs, and Supine/Towel Neck Curls &amp; Extensions on Mon/Fri plus a daily 4–8 min <em>Posture &amp; Neck</em> tab.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -351,8 +361,10 @@
             biceps:    { title: 'Best & Worst Biceps Exercises (Science)', url: 'https://www.youtube.com/watch?v=GNO4OtYoCYk', vid: 'GNO4OtYoCYk' },
             triceps:   { title: 'Best & Worst Triceps Exercises (Science)', url: 'https://www.youtube.com/watch?v=OpRMRhr0Ycc', vid: 'OpRMRhr0Ycc' },
             legs:      { title: 'Science-Based Leg Day For Muscle Growth', url: 'https://www.youtube.com/watch?v=H6mRkx1x77k', vid: 'H6mRkx1x77k' },
-            abs:       { title: 'Get Abs In 60 Days (Science)', url: 'https://www.youtube.com/watch?v=Tn-XvYG9x7w', vid: 'Tn-XvYG9x7w' },
-            arms:      { title: 'Only 2 Exercises For Massive Arms', url: 'https://www.youtube.com/watch?v=WvlDMlMx1Ok', vid: 'WvlDMlMx1Ok' }
+            abs:            { title: 'Get Abs In 60 Days (Science)', url: 'https://www.youtube.com/watch?v=Tn-XvYG9x7w', vid: 'Tn-XvYG9x7w' },
+            arms:           { title: 'Only 2 Exercises For Massive Arms', url: 'https://www.youtube.com/watch?v=WvlDMlMx1Ok', vid: 'WvlDMlMx1Ok' },
+            hunch_hailey:   { title: '10min Fix Neck Hump & Forward Head (Hailey C.)', url: 'https://www.youtube.com/watch?v=he7Jaid68dY&t=1s', vid: 'he7Jaid68dY' },
+            hunch_saunders: { title: 'FIX Forward Head Posture in 4 Min (Dr. Jon Saunders)', url: 'https://www.youtube.com/watch?v=_xg9z3bY90E', vid: '_xg9z3bY90E' }
         };
 
         // --- Comprehensive 3D Muscle Data ---
@@ -389,9 +401,21 @@
             },
             'traps': {
                 name: 'Trapezius (Upper & Mid)', group: 'back',
-                description: 'Spans neck to mid-back; stabilizes scapulae during heavy rows and carries.',
-                machines: ['Chest-Supported Row', 'Cable Face Pulls', 'Shrug Machine'],
+                description: 'Spans neck to mid-back; heavy shrugs build the upper yoke while mid/lower traps pull hunched shoulders back.',
+                machines: ['Dumbbell or Smith Shrugs', 'Cable Face Pulls', 'Chest-Supported Row'],
                 video: REF_VIDEOS.back
+            },
+            'neck_flexors': {
+                name: 'Anterior Neck (SCM & Deep Flexors)', group: 'neck',
+                description: 'Sternocleidomastoid and deep neck flexors frame front/side neck thickness and pull forward head posture back.',
+                machines: ['Supine Towel/DB Neck Curl', 'Clasped-Hand Chin Tuck Hold', 'Isometric Hand-Press Chin Tuck'],
+                video: REF_VIDEOS.hunch_saunders
+            },
+            'neck_extensors': {
+                name: 'Posterior Neck Extensors', group: 'neck',
+                description: 'Splenius capitis & semispinalis drive rear/side neck girth and counteract forward head hunch.',
+                machines: ['Towel-Resisted Neck Extension', 'Prone Neck Extension', 'Prone Y-T-W Raises'],
+                video: REF_VIDEOS.hunch_saunders
             },
             'erector_spinae': {
                 name: 'Erector Spinae (Lower Back)', group: 'back',
@@ -512,14 +536,36 @@
         const workoutPlan = {
             mon: {
                 badge: 'Day 1 • Monday',
-                title: 'Upper A — Chest, Width & Zone 2',
-                subtitle: 'Adds missing chest & shoulder width while keeping pull-ups and rows fresh.',
+                title: 'Upper A — Chest, Width, Posture & Neck',
+                subtitle: 'Opens hunched shoulders before pressing, adds Cable Face Pulls + direct neck work, and finishes with Zone 2.',
                 steps: [
                     {
+                        id: 'mon-0',
+                        name: 'Anti-Hunch Warm-Up (Foam Roller + Wall Angels)',
+                        tag: 'Fix Hunch • 2 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'PF Stretch Area',
+                        noWeightLog: true,
+                        sets: '30s Roller + 10 Wall Angels',
+                        effort: 'Warm-up before pressing',
+                        primary: ['rhomboids', 'traps'],
+                        secondary: ['rear_delts', 'neck_extensors'],
+                        camera: 'neck',
+                        why: 'Integrated from both posture videos: mobilizing your mid-back over a foam roller and running Wall Angels pulls rounded shoulders back so presses hit chest instead of rolling forward.',
+                        machineSetup: 'Use a foam roller in the Planet Fitness stretch zone horizontally across mid-back (knees bent, drape backward 30s), then stand flat against a wall for 10 slow Wall Angels.',
+                        formCues: [
+                            'Keep lower back, shoulder blades, and back of head pressed lightly to the wall on Wall Angels.',
+                            'Slide elbows & wrists up into a Y and down into a W without shrugging upper traps.',
+                            'Keep chin gently tucked (ear aligned over shoulder).'
+                        ],
+                        mistake: 'Arching your lower back off the wall to force arms overhead.',
+                        video: REF_VIDEOS.hunch_hailey,
+                        searchQuery: 'wall angels thoracic foam roller extension posture'
+                    },
+                    {
                         id: 'mon-1',
-                        name: 'Incline DB or Machine Chest Press',
+                        name: 'Incline DB or Smith Machine Chest Press',
                         tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
-                        equipment: 'Machine / Dumbbells',
+                        equipment: 'DBs / Smith Machine',
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['upper_chest'],
@@ -621,6 +667,27 @@
                         searchQuery: 'cable lateral raise proper form'
                     },
                     {
+                        id: 'mon-6b',
+                        name: 'Cable Face Pulls (External Rotation)',
+                        tag: 'Fix Hunch • PF Cable', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Cable Tower + Rope',
+                        sets: '3 sets × 12–15 reps',
+                        effort: '1–2 RIR • 60s rest',
+                        primary: ['rear_delts', 'rhomboids'],
+                        secondary: ['traps', 'neck_extensors'],
+                        camera: 'back',
+                        why: 'Top gym machine move to fix rounded shoulders and forward hunch — strengthens rear delts, mid/lower traps, and external rotators using Planet Fitness dual-pulley cables.',
+                        machineSetup: 'Set cable pulley to eye/chin height with double rope attachment; grab thumbs-back/pinkies-front and step back for tension.',
+                        formCues: [
+                            'Pull rope toward your forehead/ears while driving elbows back and rotating thumbs behind you (double-bicep finish).',
+                            'Keep chest tall and chin tucked; pause 1 second squeezing shoulder blades.',
+                            'Do not shrug shoulders up toward ears.'
+                        ],
+                        mistake: 'Going too heavy and leaning backward with lower-back momentum.',
+                        video: REF_VIDEOS.shoulders,
+                        searchQuery: 'cable face pulls external rotation posture form'
+                    },
+                    {
                         id: 'mon-6',
                         name: 'Rope Cable Crunch ("Noodle Handles")',
                         tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
@@ -640,6 +707,27 @@
                         mistake: 'Sitting back onto your heels (which turns it into a hip hinge, not abs).',
                         video: REF_VIDEOS.abs,
                         searchQuery: 'cable rope crunch proper form'
+                    },
+                    {
+                        id: 'mon-7b',
+                        name: 'Neck Thickener (Curl + Towel Extension)',
+                        tag: 'Neck Growth • 2×/Wk', tagStyle: 'bg-violet-100 text-violet-800',
+                        equipment: 'Flat Bench + Towel/DB',
+                        sets: '2 sets × 15–20 each',
+                        effort: 'Controlled • Zero Jerking',
+                        primary: ['neck_flexors', 'neck_extensors'],
+                        secondary: ['traps'],
+                        camera: 'neck',
+                        why: 'MRI/EMG studies show shrugs and rows alone barely grow cervical muscles — direct neck flexion + extension is required for real neck thickness and helps pull forward head posture back.',
+                        machineSetup: 'At Planet Fitness (no loose plates), fold a towel on your forehead with a light 5–15 lb dumbbell (or manual hand resistance) lying supine on a bench, then use a towel behind the back of your head for 10–15s extension holds.',
+                        formCues: [
+                            'Start every supine curl with a slight "yes" chin tuck first, then curl chin toward chest smoothly.',
+                            'Lower slowly over 2–3 seconds; stop well before pain or dizziness.',
+                            'Pair with Towel Neck Extensions (Dr. Saunders style: pull towel forward while pushing head & upper back upright).'
+                        ],
+                        mistake: 'Using heavy weight too soon or jerking your head with momentum.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'supine neck curl towel neck extension hypertrophy form'
                     },
                     {
                         id: 'mon-7',
@@ -817,9 +905,30 @@
             },
             fri: {
                 badge: 'Day 3 • Friday',
-                title: 'Upper B — Chest, Pull & Arms',
-                subtitle: 'Second weekly hit for chest, back, and lateral delts plus direct biceps & triceps.',
+                title: 'Upper B — Chest, Pull, Posture & Neck',
+                subtitle: 'Second hit for chest, back & delts, plus Reverse Pec Deck + Shrugs for posture/yoke, direct neck work, and optional Stair Stepper.',
                 steps: [
+                    {
+                        id: 'fri-0',
+                        name: 'Posture Reset (Clasped Chin Tuck + Pec Stretch)',
+                        tag: 'Fix Hunch • 2 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Mat / Wall',
+                        noWeightLog: true,
+                        sets: '3 × 15s Holds + Stretch',
+                        effort: 'Warm-up before lifting',
+                        primary: ['neck_flexors', 'neck_extensors'],
+                        secondary: ['rhomboids', 'middle_chest'],
+                        camera: 'neck',
+                        why: 'Combines Dr. Saunders’s clasped-hand chin tuck with Hailey C.’s wall pec stretch to release tight chest fibers pulling your shoulders forward.',
+                        machineSetup: 'Clasp hands behind low back, pull shoulder blades down/together, tilt head slightly and glide chin straight back (15s × 3). Then place forearm on wall/rack and rotate away 20s/side.',
+                        formCues: [
+                            'Think "ears back over shoulders" rather than tilting chin down at your chest.',
+                            'Keep shoulders pressed down away from your ears during both moves.'
+                        ],
+                        mistake: 'Poking chin forward or shrugging shoulders up.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'chin tuck scapular retraction wall pec stretch'
+                    },
                     {
                         id: 'fri-1',
                         name: 'Flat Chest Press Machine (or Pec Deck)',
@@ -947,6 +1056,47 @@
                         searchQuery: 'tricep extension machine proper form'
                     },
                     {
+                        id: 'fri-6b',
+                        name: 'Reverse Pec Deck + DB/Smith Shrugs',
+                        tag: 'Yoke + Anti-Hunch', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'PF Machines / DBs',
+                        sets: '2×12–15 + 2×10–12',
+                        effort: '1–2 RIR • 60s rest',
+                        primary: ['rear_delts', 'traps'],
+                        secondary: ['rhomboids', 'forearms'],
+                        camera: 'back',
+                        why: 'Reverse Pec Deck pulls rounded shoulders into alignment while DB/Smith Shrugs build the upper-trap "yoke" that supports a thicker-looking neck at Planet Fitness.',
+                        machineSetup: 'Set Pec Deck arms all the way back for reverse flyes (palms neutral or inward). Then grab heavy DBs (up to 75 lb at PF) or use the Smith Machine for shrugs.',
+                        formCues: [
+                            'On Reverse Pec Deck, sweep hands wide in an arc without jamming shoulder blades together aggressively.',
+                            'On Shrugs, lean forward ~10° slightly and shrug straight up/back toward ears with a 1-second pause at top.',
+                            'Lower shoulders all the way into a full stretch.'
+                        ],
+                        mistake: 'Rolling shoulders in circles during shrugs (just go straight up and down).',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'reverse pec deck dumbbell shrugs proper form'
+                    },
+                    {
+                        id: 'fri-6c',
+                        name: 'Neck Thickener (Curl + Towel Extension)',
+                        tag: 'Neck Growth • 2×/Wk', tagStyle: 'bg-violet-100 text-violet-800',
+                        equipment: 'Flat Bench + Towel/DB',
+                        sets: '2 sets × 15–20 each',
+                        effort: 'Controlled • Zero Jerking',
+                        primary: ['neck_flexors', 'neck_extensors'],
+                        secondary: ['traps'],
+                        camera: 'neck',
+                        why: 'Second weekly direct neck stimulus — neck muscles recover fast and respond best to 2–3×/week controlled volume.',
+                        machineSetup: 'Supine on flat bench with folded towel + light dumbbell (or manual hand resistance) for curls, plus towel behind head for 10–15s isometric extensions.',
+                        formCues: [
+                            'Perform micro chin-tuck before every neck curl rep.',
+                            'Keep slow 2-second eccentric lowering; add 2.5–5 lb only after hitting 20 clean reps.'
+                        ],
+                        mistake: 'Bouncing head at the bottom or pushing through sharp neck pain.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'neck curl neck extension hypertrophy progressive overload'
+                    },
+                    {
                         id: 'fri-7',
                         name: 'Zone 2 Treadmill or Stair Stepper',
                         tag: 'Best Stair Swap Day', tagStyle: 'bg-amber-100 text-amber-800',
@@ -975,16 +1125,16 @@
                 steps: [
                     {
                         id: 'sun-1',
-                        name: 'Romanian Deadlift (or Trap Bar Deadlift)',
-                        tag: 'New Mass & Burn Builder', tagStyle: 'bg-emerald-100 text-emerald-700',
-                        equipment: 'Dumbbells / Barbell',
+                        name: 'Dumbbell or Smith Machine RDL',
+                        tag: 'PF-Friendly Hinge', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'DBs (to 75lb) / Smith',
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['hamstrings', 'glute_maximus'],
                         secondary: ['erector_spinae', 'traps', 'forearms'],
                         camera: 'back',
-                        why: 'Your old routine had 0 hip-hinge work. RDLs build strong hamstrings/glutes and burn major energy without knee pounding.',
-                        machineSetup: 'Hold dumbbells or barbell at thighs, unlock knees slightly (~15° bend), and keep that knee angle fixed.',
+                        why: 'Planet Fitness San Jose has DBs up to 75 lb and Smith Machines (no Trap Bars/free Olympic barbells). Smith or DB RDLs give heavy hamstring/glute work cleanly inside PF.',
+                        machineSetup: 'Hold DBs at thighs (or stand under PF Smith bar; note unloaded bar feels ~15–20 lb). Unlock knees ~15° and lock that knee angle.',
                         formCues: [
                             'Push your hips straight back toward the wall behind you while keeping weights glued to your legs.',
                             'Stop as soon as your hips stop moving back (mid-shin level) with a deep hamstring stretch.',
@@ -992,7 +1142,7 @@
                         ],
                         mistake: 'Rounding your lower back or turning it into a squat by bending knees too much.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'dumbbell romanian deadlift proper form'
+                        searchQuery: 'smith machine or dumbbell romanian deadlift proper form'
                     },
                     {
                         id: 'sun-2',
@@ -1099,6 +1249,162 @@
                         searchQuery: 'zone 2 cardio fat oxidation incline walking'
                     }
                 ]
+            },
+            posture: {
+                badge: 'Daily • 4–8 Min (Home or Gym)',
+                title: 'Fix Hunch & Thicker Neck',
+                subtitle: 'Combines both YouTube posture routines (Hailey C. + Dr. Jon Saunders) with direct neck work.',
+                steps: [
+                    {
+                        id: 'pos-1',
+                        name: 'Neck Mobility Warm-Up (Rotations + Tilts)',
+                        tag: 'Dr. Saunders • 1 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Bodyweight',
+                        noWeightLog: true,
+                        sets: '2 rounds × 30s',
+                        effort: 'Gentle warm-up',
+                        primary: ['neck_flexors', 'neck_extensors'],
+                        secondary: ['traps'],
+                        camera: 'neck',
+                        why: 'Warms up cervical joints and fascia before strengthening — directly from Dr. Jon Saunders’s 4-minute forward-head protocol.',
+                        machineSetup: 'Sit or stand tall with shoulders pulled back and down.',
+                        formCues: [
+                            '10s slow left/right head rotations, 10s gentle flexion/extension & protraction/retraction.',
+                            '10s lateral ear-to-ceiling tilts on both sides (think pulling top ear upward rather than crunching).'
+                        ],
+                        mistake: 'Forcing end-range circles fast or shrugging shoulders.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'neck mobility warmup forward head posture'
+                    },
+                    {
+                        id: 'pos-2',
+                        name: 'Clasped-Hand Scapular Retraction + Chin Tuck',
+                        tag: 'Dr. Saunders • 1 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Bodyweight',
+                        noWeightLog: true,
+                        sets: '3 sets × 10–15s holds',
+                        effort: 'Active squeeze',
+                        primary: ['neck_flexors', 'rhomboids'],
+                        secondary: ['rear_delts', 'neck_extensors'],
+                        camera: 'neck',
+                        why: 'Chin tucks alone fail if shoulders stay rounded; clasping hands behind your back forces external shoulder rotation and mid-back activation together.',
+                        machineSetup: 'Stand or sit tall, clasp hands behind your lower back.',
+                        formCues: [
+                            'Pull shoulder blades back and together (externally rotate arms) and feel your chest open.',
+                            'Slightly extend head, then glide chin straight backward like making a double chin.',
+                            'Hold 10–15 seconds per rep, feeling tension between your shoulder blades.'
+                        ],
+                        mistake: 'Dropping chin down toward chest instead of sliding head straight back.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'clasped hands chin tuck forward head posture'
+                    },
+                    {
+                        id: 'pos-3',
+                        name: 'Towel-Resisted Neck Extension + Chin Tuck',
+                        tag: 'Dr. Saunders • Neck + Hunch', tagStyle: 'bg-violet-100 text-violet-800',
+                        equipment: 'Towel / Band',
+                        noWeightLog: true,
+                        sets: '3 sets × 10–15s holds',
+                        effort: 'Posterior neck & mid-back',
+                        primary: ['neck_extensors'],
+                        secondary: ['rhomboids', 'traps'],
+                        camera: 'neck',
+                        why: 'Replaces clinic head-weights using any towel: builds posterior cervical muscles (neck thickness + upright head alignment) against arm resistance.',
+                        machineSetup: 'Loop a towel behind the upper back of your head, holding both ends out in front of you.',
+                        formCues: [
+                            'Push arms slightly forward/down for light tension while extending your upper back tall and pressing head back into the towel.',
+                            'Hold 10–15 seconds without letting the towel pull your head forward.'
+                        ],
+                        mistake: 'Letting your lower back arch instead of lengthening upper spine.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'towel neck extension exercise forward head posture'
+                    },
+                    {
+                        id: 'pos-4',
+                        name: 'Thoracic Foam Roller / Towel Extension',
+                        tag: 'Dr. Saunders • Open Hunch', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Foam Roller / Rolled Towel',
+                        noWeightLog: true,
+                        sets: '30–90s passive stretch',
+                        effort: 'Relax & breathe',
+                        primary: ['rhomboids', 'erector_spinae'],
+                        secondary: ['middle_chest', 'neck_extensors'],
+                        camera: 'side',
+                        why: 'Addresses thoracic hyperkyphosis (the upper-back curve causing hunchback posture) by pivoting mid-back into extension.',
+                        machineSetup: 'Lie supine with a foam roller (in PF stretch zone) or rolled towel/yoga block horizontally under your mid-back (shoulder blade level), knees bent.',
+                        formCues: [
+                            'Support head lightly with hands or let arms open wide into a T/Y on the floor.',
+                            'Exhale slowly and let your upper back drape backward over the roller.'
+                        ],
+                        mistake: 'Placing the roller too low on your lumbar lower back.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'thoracic spine extension foam roller posture'
+                    },
+                    {
+                        id: 'pos-5',
+                        name: 'Prone Y-T-W Upper Back Raises',
+                        tag: 'Hailey C. • 3 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Mat (Floor/Bed)',
+                        noWeightLog: true,
+                        sets: '2 rounds × 10 each (Y/T/W)',
+                        effort: 'Squeeze shoulder blades',
+                        primary: ['traps', 'rhomboids'],
+                        secondary: ['rear_delts', 'neck_extensors'],
+                        camera: 'back',
+                        why: 'Directly from Hailey C.’s routine: trains lower traps, rhomboids, and rear delts in Y (thumbs up), T (arms out), and W shapes to pull hunched posture upright.',
+                        machineSetup: 'Lie face down on a mat (forehead hovering 1 inch off mat, chin tucked).',
+                        formCues: [
+                            'Y-raises: arms overhead in a Y with thumbs pointing up; lift arms using mid/lower back.',
+                            'T-raises: arms straight out to sides; W-raises: elbows bent squeezing shoulder blades down and back.',
+                            'Keep neck long — never shrug upper traps toward ears.'
+                        ],
+                        mistake: 'Cranking your head upward to look forward (keep eyes looking down at mat).',
+                        video: REF_VIDEOS.hunch_hailey,
+                        searchQuery: 'prone ytw exercise upper back posture'
+                    },
+                    {
+                        id: 'pos-6',
+                        name: 'Wall Angels + Pec & Neck Stretches',
+                        tag: 'Hailey C. • 2 Min', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Wall',
+                        noWeightLog: true,
+                        sets: '45s Angels + 30s Stretches',
+                        effort: 'Posture reset',
+                        primary: ['rhomboids', 'middle_chest'],
+                        secondary: ['traps', 'neck_extensors'],
+                        camera: 'back',
+                        why: 'Locks in upright wall alignment, stretches tight chest muscles pulling you into a slouch, and releases tight upper-trap/neck tension.',
+                        machineSetup: 'Stand with heels 3–4 inches from a wall, lower back/upper back/head touching wall.',
+                        formCues: [
+                            'Slide forearms up and down the wall for 45s keeping ribs down.',
+                            'Follow with 1 arm on wall (turn away 20s/side for pec stretch) + gentle ear-to-shoulder & armpit neck stretches (5 breaths/side).'
+                        ],
+                        mistake: 'Pulling hard on your neck during stretches — keep gentle 3/10 stretch tension.',
+                        video: REF_VIDEOS.hunch_hailey,
+                        searchQuery: 'wall angels wall pec stretch neck stretch'
+                    },
+                    {
+                        id: 'pos-7',
+                        name: 'Weighted Supine Neck Curl (2–3×/Wk)',
+                        tag: 'Neck Growth • Track lb', tagStyle: 'bg-violet-100 text-violet-800',
+                        equipment: 'Flat Bench + Towel/DB',
+                        sets: '2–3 sets × 15–20 reps',
+                        effort: '1–2 RIR • Slow tempo',
+                        primary: ['neck_flexors'],
+                        secondary: ['neck_extensors'],
+                        camera: 'neck',
+                        why: 'Directly thickens the sternocleidomastoid (SCM) on the front/sides of your neck — start light (bodyweight or 5–10 lb) and add 2.5–5 lb only once hitting 20 clean reps.',
+                        machineSetup: 'Lie face up on a bench with head & neck hanging off the edge. Fold a towel on your forehead holding a light dumbbell (5–15 lb at PF) steadily with both hands.',
+                        formCues: [
+                            'Start with a small "yes" chin tuck, then curl chin toward chest.',
+                            'Lower smoothly over 2–3 seconds into a comfortable stretch.',
+                            'Can also do side-lying lateral neck raises (15 reps/side) for side-neck width.'
+                        ],
+                        mistake: 'Starting too heavy or bouncing out of full neck extension.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'supine neck curl proper form hypertrophy'
+                    }
+                ]
             }
         };
 
@@ -1124,7 +1430,8 @@
             front: { pos: new THREE.Vector3(0, 1.15, 6.2), target: new THREE.Vector3(0, 0.95, 0) },
             angle: { pos: new THREE.Vector3(3.9, 1.35, 4.9), target: new THREE.Vector3(0, 0.95, 0) },
             side:  { pos: new THREE.Vector3(6.1, 1.10, 0.1), target: new THREE.Vector3(0, 0.95, 0) },
-            back:  { pos: new THREE.Vector3(0, 1.15, -6.2), target: new THREE.Vector3(0, 0.95, 0) }
+            back:  { pos: new THREE.Vector3(0, 1.15, -6.2), target: new THREE.Vector3(0, 0.95, 0) },
+            neck:  { pos: new THREE.Vector3(2.4, 2.55, 3.2), target: new THREE.Vector3(0, 2.38, 0) }
         };
 
         function isMobile() {
@@ -1136,9 +1443,14 @@
             const pos = p.pos.clone();
             const target = p.target.clone();
             if (isMobile()) {
-                pos.multiplyScalar(1.48);
-                pos.y = 1.65;
-                target.y = 1.35;
+                if (presetName === 'neck') {
+                    pos.multiplyScalar(1.22);
+                    target.y = 2.38;
+                } else {
+                    pos.multiplyScalar(1.48);
+                    pos.y = 1.65;
+                    target.y = 1.35;
+                }
             }
             return { pos, target };
         }
@@ -1283,6 +1595,12 @@
                 scene.add(m);
                 muscleMeshes.push(m);
             };
+
+            // Neck (SCM flexors + posterior extensors)
+            [-1, 1].forEach(s => {
+                add(tube([[s * 0.13, 2.72, 0.02], [s * 0.11, 2.57, 0.08], [s * 0.05, 2.43, 0.14]], 0.055), 0x8b5cf6, 'neck_flexors', [0, 0, 0]);
+                add(tube([[s * 0.08, 2.74, -0.09], [s * 0.09, 2.58, -0.13], [s * 0.09, 2.42, -0.15]], 0.062), 0x14b8a6, 'neck_extensors', [0, 0, 0]);
+            });
 
             // Chest
             [-1, 1].forEach(s => {
@@ -1782,6 +2100,16 @@
         }
 
         function renderLogCard(step) {
+            if (step.noWeightLog) {
+                return `
+                <div class="p-3 rounded-xl bg-teal-50/70 border border-teal-200 flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-teal-800">Mobility &amp; Posture Drill</div>
+                        <div class="text-xs font-semibold text-slate-800 mt-0.5">${step.sets} • ${step.equipment}</div>
+                    </div>
+                    <span class="px-2 py-1 rounded-lg bg-white border border-teal-200 text-[11px] font-bold text-teal-700">Zero Weight</span>
+                </div>`;
+            }
             const logs = weightLogs[step.id] || [];
             const isCardio = step.equipment === 'Treadmill' || step.equipment === 'Treadmill / Stepper';
             const latest = logs[logs.length - 1];
