@@ -27,16 +27,25 @@
         }
         canvas { display: block; outline: none; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(203, 213, 225, 0.9);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 213, 225, 0.95);
             box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
         }
         .day-tab {
-            transition: all 0.18s ease;
+            color: #334155;
+            background: transparent;
+            -webkit-tap-highlight-color: transparent;
+            transition: none;
         }
-        .day-tab.active {
+        .day-tab:not(.active):hover {
+            color: #0f172a;
+            background: rgba(241, 245, 249, 0.9);
+        }
+        .day-tab.active,
+        .day-tab.active:hover,
+        .day-tab.active:focus {
             background: #0f172a;
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22);
@@ -85,6 +94,11 @@
         .animate-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: drawCheck 0.45s 0.15s ease-out forwards; }
         @media (max-width: 767px) {
             html, body { height: 100dvh; touch-action: manipulation; }
+            .glass-panel {
+                background: #ffffff;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
             #canvas-container {
                 top: 0;
                 left: 0;
@@ -120,10 +134,12 @@
                 border-radius: 1.25rem 1.25rem 0 0;
                 border-bottom: 0;
                 transform: translateY(110%);
-                transition: top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+                pointer-events: none;
+                transition: top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
             }
             #info-panel.mobile-open {
                 transform: translateY(0) !important;
+                pointer-events: auto;
             }
             #panel-footer {
                 padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 34px) !important;
@@ -184,12 +200,12 @@
         </div>
 
         <nav id="day-tabs" class="glass-panel rounded-2xl p-1 md:p-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar pointer-events-auto">
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="explore">Explore 3D</button>
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="mon">Mon · Upper A</button>
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="wed">Wed · Lower A</button>
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="fri">Fri · Upper B</button>
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="sun">Sun · Lower B</button>
-            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold text-slate-600 hover:text-slate-900 whitespace-nowrap" data-day="posture">Posture &amp; Neck</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="explore">Explore 3D</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="mon">Mon · Upper A</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="wed">Wed · Lower A</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="fri">Fri · Upper B</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="sun">Sun · Lower B</button>
+            <button class="day-tab px-2.5 md:px-3 py-1.5 rounded-xl text-[11px] md:text-xs font-semibold whitespace-nowrap" data-day="posture">Posture &amp; Neck</button>
         </nav>
     </header>
 
@@ -197,7 +213,7 @@
     <aside id="left-sidebar" class="fixed top-28 lg:top-20 left-3 bottom-16 w-80 md:w-96 z-20 flex flex-col pointer-events-none">
         <!-- Day Plan Panel -->
         <div id="day-panel" class="glass-panel rounded-2xl flex flex-col h-full overflow-hidden pointer-events-auto">
-            <div class="p-3 md:p-4 border-b border-slate-200 bg-white/70">
+            <div class="p-3 md:p-4 border-b border-slate-200 bg-white">
                 <div class="flex items-start justify-between gap-2">
                     <div>
                         <span id="day-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-100 text-blue-700"></span>
@@ -259,7 +275,7 @@
 
     <!-- Right Detail Drawer (Desktop) / Step Form Sheet (Mobile) -->
     <div id="info-panel" class="fixed top-20 right-3 bottom-3 w-full max-w-md glass-panel rounded-2xl z-30 transform md:translate-x-[110%] transition-transform duration-300 flex flex-col overflow-hidden">
-        <div class="p-3.5 md:p-4 border-b border-slate-200 bg-white/80 flex items-start justify-between gap-3">
+        <div class="p-3.5 md:p-4 border-b border-slate-200 bg-white flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <div id="panel-eyebrow" class="text-[11px] font-bold uppercase tracking-wider text-blue-600"></div>
                 <h2 id="panel-title" class="text-base md:text-lg font-bold text-slate-900 leading-snug mt-0.5">Select an item</h2>
@@ -370,11 +386,11 @@
                     </ul>
                 </div>
                 <div class="p-3.5 rounded-xl bg-indigo-50 border border-indigo-200">
-                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-1.5">Planet Fitness San Jose + Hunch &amp; Neck Plan</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-1.5">Planet Fitness San Jose + Balanced 4-Day Flow</div>
                     <ul class="space-y-1.5 text-xs text-slate-700">
                         <li><strong>Planet Fitness covers 100% of this routine:</strong> San Jose clubs have Smith Machines, Dumbbells up to 75 lb, Cable Towers (Face Pulls/Rows/Crunches), Matrix/Hammer machines, Reverse Pec Deck, Foam Rollers, Treadmills, and Stair Steppers.</li>
-                        <li><strong>When 24 Hour Fitness helps later:</strong> Only if you pass 75 lb DBs per hand on RDLs or want free Olympic barbells / Trap Bars / loose 5–10 lb plates.</li>
-                        <li><strong>Fix Hunch + Thicker Neck:</strong> Added 2-min Thoracic Foam Roller + Wall Angels warm-ups, Cable Face Pulls, Reverse Pec Deck + Shrugs, and Supine/Towel Neck Curls &amp; Extensions on Mon/Fri plus a daily 4–8 min <em>Posture &amp; Neck</em> tab.</li>
+                        <li><strong>Friday offloaded onto Wed &amp; Sun:</strong> Moved Tricep Extension + Neck Thickener to Wednesday and separated Reverse Pec Deck &amp; Smith Machine Shrugs onto Sunday so no day turns into a marathon.</li>
+                        <li><strong>Cardio baked in per day:</strong> Mon, Wed, and Sun finish with Zone 2 Incline Treadmill Walk; Friday finishes with Zone 2 Stair Stepper (no toggle).</li>
                     </ul>
                 </div>
             </div>
@@ -760,7 +776,7 @@
                     },
                     {
                         id: 'mon-7',
-                        name: 'Zone 2 Incline Treadmill (or Stepper)',
+                        name: 'Zone 2 Incline Treadmill Walk',
                         tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
                         equipment: 'Treadmill',
                         sets: '6–8% • 3.0–3.2 mph • 25–30 min',
@@ -769,7 +785,7 @@
                         secondary: ['quads', 'hamstrings'],
                         camera: 'side',
                         why: 'Replaces the 4-mile run right after lifting: burns steady fat calories with low cortisol and minimal appetite rebound, using 0 extra gym days.',
-                        machineSetup: 'Start at 6% incline, 3.0–3.2 mph for 25–30 minutes (hands off rails). On Upper days, you can occasionally swap in 20–25 min on the Stair Stepper at a conversational Zone 2 pace.',
+                        machineSetup: 'Set 6–8% incline at 3.0–3.2 mph for 25–30 minutes (hands off rails). Stair Stepper is already baked into Friday instead.',
                         formCues: [
                             'Walk tall without holding onto the front console rails (holding cuts calorie burn up to ~40%).',
                             'Adjust incline ±1–2% after 5 min so heart rate stays in 60–70% max (able to speak full sentences).',
@@ -783,8 +799,8 @@
             },
             wed: {
                 badge: 'Day 2 • Wednesday',
-                title: 'Lower A — Quads, Glutes & Hips',
-                subtitle: 'Starts fresh with Leg Press at #1; keeps Glute Kickback, Leg Extension, Lying Curl, Abduction, and Adduction separate.',
+                title: 'Lower A — Legs, Triceps & Neck',
+                subtitle: 'Starts fresh with Leg Press at #1, keeps Abduction/Adduction separate, and adds Tricep Extension + Neck offloaded from Friday.',
                 steps: [
                     {
                         id: 'wed-1',
@@ -911,22 +927,63 @@
                         searchQuery: 'hip adduction machine proper form'
                     },
                     {
+                        id: 'fri-6',
+                        name: 'Tricep Extension Machine (or Rope Pushdown)',
+                        tag: 'Offloaded from Fri', tagStyle: 'bg-indigo-100 text-indigo-700',
+                        equipment: 'Machine / Cable',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1 RIR • 60s rest',
+                        primary: ['triceps'],
+                        secondary: [],
+                        camera: 'side',
+                        why: 'Moved here from Friday to lighten Upper B — gives arms fresh focus after Lower A with a full 48h rest before Friday Flat Chest Press.',
+                        machineSetup: 'Keep upper arms locked onto the pad (or pinned to sides on cable pushdown).',
+                        formCues: [
+                            'Extend forearms all the way to full lockout and hold 1 beat.',
+                            'Allow elbows to bend deeply on the return so the triceps get stretched under load.',
+                            'Keep shoulders relaxed down, away from ears.'
+                        ],
+                        mistake: 'Only moving halfway back up, missing the stretched half of the rep.',
+                        video: REF_VIDEOS.triceps,
+                        searchQuery: 'tricep extension machine proper form'
+                    },
+                    {
+                        id: 'fri-6c',
+                        name: 'Neck Thickener (Curl + Towel Extension)',
+                        tag: 'Neck 2×/Wk • From Fri', tagStyle: 'bg-violet-100 text-violet-800',
+                        equipment: 'Flat Bench + Towel/DB',
+                        sets: '2 sets × 15–20 each',
+                        effort: 'Controlled • Zero Jerking',
+                        primary: ['neck_flexors', 'neck_extensors'],
+                        secondary: ['traps'],
+                        camera: 'neck',
+                        why: 'Moved from overloaded Friday to lighter Wednesday — keeps neck training 2×/week (Mon + Wed) with 48h recovery instead of back-to-back with Monday.',
+                        machineSetup: 'Supine on flat bench with folded towel + light dumbbell (or manual hand resistance) for curls, plus towel behind head for 10–15s isometric extensions.',
+                        formCues: [
+                            'Perform micro chin-tuck before every neck curl rep.',
+                            'Keep slow 2-second eccentric lowering; add 2.5–5 lb only after hitting 20 clean reps.'
+                        ],
+                        mistake: 'Bouncing head at the bottom or pushing through sharp neck pain.',
+                        video: REF_VIDEOS.hunch_saunders,
+                        searchQuery: 'neck curl neck extension hypertrophy progressive overload'
+                    },
+                    {
                         id: 'wed-7',
                         name: 'Zone 2 Incline Treadmill Walk',
-                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        tag: 'Baked In • Cardio', tagStyle: 'bg-amber-100 text-amber-800',
                         equipment: 'Treadmill',
                         sets: '6% • 3.0 mph • 20–25 min',
                         effort: 'Zone 2 (60–70% Max HR)',
                         primary: ['glute_maximus', 'calves'],
                         secondary: ['quads', 'hamstrings'],
                         camera: 'side',
-                        why: 'Stick to Incline Treadmill on Wednesday instead of Stair Stepper — after Leg Press and leg curls, incline walking burns fat without overloading fatigued quads and knees.',
+                        why: 'Baked-in Wednesday Zone 2 walk — right after Leg Press and leg curls, incline walking burns fat without overloading fatigued quads and knees.',
                         machineSetup: 'Set 6% incline and 3.0 mph for 20–25 minutes, hands off rails. Bump incline ±1–2% after 5 minutes based on your Apple Watch heart rate.',
                         formCues: [
                             'Walk upright without holding the console or rails.',
                             'Keep pace conversational (full sentences comfortable); incline drives the burn, not high speed.'
                         ],
-                        mistake: 'Swapping in Stair Stepper right after heavy Leg Press (adds too much quad/knee fatigue).',
+                        mistake: 'Grabbing the rails or pushing speed into a jog.',
                         video: null,
                         searchQuery: 'zone 2 cardio after leg day incline walk'
                     }
@@ -934,8 +991,8 @@
             },
             fri: {
                 badge: 'Day 3 • Friday',
-                title: 'Upper B — Chest, Pull, Posture & Neck',
-                subtitle: 'Second hit for chest, back & delts, plus Reverse Pec Deck + Shrugs for posture/yoke, direct neck work, and optional Stair Stepper.',
+                title: 'Upper B — Chest, Back, Delts & Stepper',
+                subtitle: 'Trimmed to 5 crisp lifts + 2-min posture warm-up + baked-in Stair Stepper (Triceps/Neck moved to Wed; Shrugs/Rear Delts to Sun).',
                 steps: [
                     {
                         id: 'fri-0',
@@ -1010,14 +1067,14 @@
                         primary: ['rhomboids', 'traps'],
                         secondary: ['rear_delts', 'lats'],
                         camera: 'back',
-                        why: 'Complements Monday’s cable row with a higher 45–60° elbow angle for rear delts & upper-back posture.',
-                        machineSetup: 'The V-angled bars on PF’s Matrix row are ergonomic diverging handles (and the vertical center post with the yellow cap is a 1-arm anchor). Grip lower down on the straight rubber below the worn tip with palms facing down—or if the right bar feels crooked, hold the yellow center post with one hand and do 1-arm rows on the good side (or hop onto the Seated Cable Row nearby).',
+                        why: 'Complements Monday’s cable row with a higher elbow path for upper-back posture.',
+                        machineSetup: 'Because PF’s Matrix bars stick upward in a V-angle, hold them like shaking hands: thumbs pointing UP along the bars (natural neutral/angled grip, NOT twisted flat palms-down). Place both hands lower on the straight rubber below the peeled right tip—or grip the yellow-capped center post to brace and row 1 arm at a time (or use the Seated Cable Row nearby).',
                         formCues: [
-                            'Set chest pad so arms get a full forward stretch while chest stays glued to the pad.',
-                            'Grip wider/lower (palms down) and flare elbows ~45–60° to hit upper back & rear delts.',
-                            'Squeeze shoulder blades together for 1 second at the top, then lower slowly.'
+                            'Adjust chest pad so arms get a full forward stretch while chest stays glued to the pad.',
+                            'Keep thumbs pointed up along the bars and drive elbows back ~45° out from ribs (mid-back/rear delts).',
+                            'Squeeze shoulder blades together for 1 second, then lower under control.'
                         ],
-                        mistake: 'Lifting your chest off the pad or gripping only the peeled top tip when one arm feels uneven.',
+                        mistake: 'Trying to force palms flat downward on upright bars or gripping the loose top tip.',
                         video: REF_VIDEOS.back,
                         searchQuery: 'matrix chest supported row machine proper form'
                     },
@@ -1064,93 +1121,31 @@
                         searchQuery: 'dumbbell bicep curl proper form'
                     },
                     {
-                        id: 'fri-6',
-                        name: 'Tricep Extension Machine (or Rope Pushdown)',
-                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Machine / Cable',
-                        sets: '3 sets × 10–12 reps',
-                        effort: '1 RIR • 60s rest',
-                        primary: ['triceps'],
-                        secondary: [],
-                        camera: 'side',
-                        why: 'Kept your tricep extension machine and bumped to 3 full sets to match your bicep volume.',
-                        machineSetup: 'Keep upper arms locked onto the pad (or pinned to sides on cable pushdown).',
-                        formCues: [
-                            'Extend forearms all the way to full lockout and hold 1 beat.',
-                            'Allow elbows to bend deeply on the return so the triceps get stretched under load.',
-                            'Keep shoulders relaxed down, away from ears.'
-                        ],
-                        mistake: 'Only moving halfway back up, missing the stretched half of the rep.',
-                        video: REF_VIDEOS.triceps,
-                        searchQuery: 'tricep extension machine proper form'
-                    },
-                    {
-                        id: 'fri-6b',
-                        name: 'Reverse Pec Deck + DB/Smith Shrugs',
-                        tag: 'Yoke + Anti-Hunch', tagStyle: 'bg-teal-100 text-teal-800',
-                        equipment: 'PF Machines / DBs',
-                        sets: '2×12–15 + 2×10–12',
-                        effort: '1–2 RIR • 60s rest',
-                        primary: ['rear_delts', 'traps'],
-                        secondary: ['rhomboids', 'forearms'],
-                        camera: 'back',
-                        why: 'Reverse Pec Deck pulls rounded shoulders into alignment while DB/Smith Shrugs build the upper-trap "yoke" that supports a thicker-looking neck at Planet Fitness.',
-                        machineSetup: 'Set Pec Deck arms all the way back for reverse flyes (palms neutral or inward). Then grab heavy DBs (up to 75 lb at PF) or use the Smith Machine for shrugs.',
-                        formCues: [
-                            'On Reverse Pec Deck, sweep hands wide in an arc without jamming shoulder blades together aggressively.',
-                            'On Shrugs, lean forward ~10° slightly and shrug straight up/back toward ears with a 1-second pause at top.',
-                            'Lower shoulders all the way into a full stretch.'
-                        ],
-                        mistake: 'Rolling shoulders in circles during shrugs (just go straight up and down).',
-                        video: REF_VIDEOS.back,
-                        searchQuery: 'reverse pec deck dumbbell shrugs proper form'
-                    },
-                    {
-                        id: 'fri-6c',
-                        name: 'Neck Thickener (Curl + Towel Extension)',
-                        tag: 'Neck Growth • 2×/Wk', tagStyle: 'bg-violet-100 text-violet-800',
-                        equipment: 'Flat Bench + Towel/DB',
-                        sets: '2 sets × 15–20 each',
-                        effort: 'Controlled • Zero Jerking',
-                        primary: ['neck_flexors', 'neck_extensors'],
-                        secondary: ['traps'],
-                        camera: 'neck',
-                        why: 'Second weekly direct neck stimulus — neck muscles recover fast and respond best to 2–3×/week controlled volume.',
-                        machineSetup: 'Supine on flat bench with folded towel + light dumbbell (or manual hand resistance) for curls, plus towel behind head for 10–15s isometric extensions.',
-                        formCues: [
-                            'Perform micro chin-tuck before every neck curl rep.',
-                            'Keep slow 2-second eccentric lowering; add 2.5–5 lb only after hitting 20 clean reps.'
-                        ],
-                        mistake: 'Bouncing head at the bottom or pushing through sharp neck pain.',
-                        video: REF_VIDEOS.hunch_saunders,
-                        searchQuery: 'neck curl neck extension hypertrophy progressive overload'
-                    },
-                    {
                         id: 'fri-7',
-                        name: 'Zone 2 Treadmill or Stair Stepper',
-                        tag: 'Best Stair Swap Day', tagStyle: 'bg-amber-100 text-amber-800',
-                        equipment: 'Treadmill / Stepper',
-                        sets: '6–8% • 3.0–3.2 mph • 25–30 min',
+                        name: 'Zone 2 Stair Stepper',
+                        tag: 'Baked In • Stair Stepper', tagStyle: 'bg-amber-100 text-amber-800',
+                        equipment: 'Stair Stepper',
+                        sets: 'Level 5–7 • 20–25 min',
                         effort: 'Zone 2 (60–70% Max HR)',
                         primary: ['glute_maximus', 'calves'],
                         secondary: ['quads', 'hamstrings'],
                         camera: 'side',
-                        why: 'Friday is the ideal day to swap in the Stair Stepper (20–25 min) if you want variety and higher calorie burn per minute, since legs are 48h recovered between Wed and Sun.',
-                        machineSetup: 'Treadmill: 6–8% incline at 3.0–3.2 mph for 25–30 min. Or Stair Stepper: steady Level 5–7 for 20–25 min without leaning on rails.',
+                        why: 'Baked into Friday (legs have 48h recovery between Wed and Sun, and Friday lifting is now lighter) for higher calorie burn per minute and lower-body variety.',
+                        machineSetup: 'Step on a Planet Fitness Stair Stepper at steady Level 5–7 for 20–25 minutes with full-foot steps.',
                         formCues: [
-                            'Keep hands light or completely off the handrails on either machine.',
-                            'If using Stair Stepper, watch Apple Watch HR so it stays in Zone 2 instead of drifting into Zone 3–4.'
+                            'Stand upright with hands completely off rails (or light fingertips only for balance).',
+                            'Watch Apple Watch HR so you stay in steady Zone 2 rather than sprinting into Zone 3–4.'
                         ],
-                        mistake: 'Drapping your upper body weight over the Stair Stepper rails (kills calorie burn).',
+                        mistake: 'Draping your bodyweight over the handrails (cuts calorie burn dramatically).',
                         video: null,
-                        searchQuery: 'stairmaster vs incline treadmill zone 2 fat loss'
+                        searchQuery: 'stairmaster zone 2 fat loss proper posture'
                     }
                 ]
             },
             sun: {
                 badge: 'Day 4 • Sunday',
-                title: 'Lower B — Posterior Chain, Calves & Core',
-                subtitle: 'Balances Wednesday’s squats with heavy hip hinging, calves, Captain’s Chair, and Zone 2.',
+                title: 'Lower B — Posterior Chain, Yoke & Rear Delts',
+                subtitle: 'Balances Wednesday with RDLs + Smith Shrugs (paired), Leg Press, Seated Curl, Calves, Reverse Pec Deck (separate step), Captain’s Chair & Zone 2.',
                 steps: [
                     {
                         id: 'sun-1',
@@ -1172,6 +1167,27 @@
                         mistake: 'Rounding your lower back or turning it into a squat by bending knees too much.',
                         video: REF_VIDEOS.legs,
                         searchQuery: 'smith machine or dumbbell romanian deadlift proper form'
+                    },
+                    {
+                        id: 'sun-shrug',
+                        name: 'Smith Machine (or DB) Shrugs',
+                        tag: 'Separated • Yoke', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'Smith Machine / DBs',
+                        sets: '3 sets × 10–12 reps',
+                        effort: '1–2 RIR • 60s rest',
+                        primary: ['traps'],
+                        secondary: ['forearms', 'neck_extensors'],
+                        camera: 'front',
+                        why: 'Separated from Reverse Pec Deck and paired right after Smith/DB RDLs so you use the same Smith bar or dumbbells with zero extra station wait while building upper traps.',
+                        machineSetup: 'Stand tall holding the Smith bar (unloaded feels ~15–20 lb + added plates) or heavy DBs right in front of thighs, arms straight.',
+                        formCues: [
+                            'Lean torso forward just ~10° and shrug straight up and slightly back toward your ears.',
+                            'Pause for a crisp 1-second squeeze at the top of every rep.',
+                            'Lower smoothly all the way into a full shoulder-blade stretch.'
+                        ],
+                        mistake: 'Rolling your shoulders in circles or bending elbows to pull the bar up.',
+                        video: REF_VIDEOS.back,
+                        searchQuery: 'smith machine shrugs proper form'
                     },
                     {
                         id: 'sun-2',
@@ -1237,6 +1253,27 @@
                         searchQuery: 'standing calf raise proper form stretch'
                     },
                     {
+                        id: 'fri-6b',
+                        name: 'Reverse Pec Deck (Rear Delts)',
+                        tag: 'Separated • Anti-Hunch', tagStyle: 'bg-teal-100 text-teal-800',
+                        equipment: 'PF Reverse Pec Deck',
+                        sets: '3 sets × 12–15 reps',
+                        effort: '1–2 RIR • 60s rest',
+                        primary: ['rear_delts'],
+                        secondary: ['rhomboids', 'traps'],
+                        camera: 'back',
+                        why: 'Separated from Shrugs into its own dedicated step and offloaded from Friday to lighter Sunday — pulls rounded shoulders back cleanly.',
+                        machineSetup: 'Set Pec Deck arms all the way forward/back for reverse flyes; set seat so hands sit right at chest/shoulder height with palms neutral or facing down.',
+                        formCues: [
+                            'Sweep hands out and back in a wide arc (think pushing hands toward the side walls, not clapping shoulder blades together hard).',
+                            'Keep chest planted gently on the pad without shrugging shoulders toward ears.',
+                            'Control a 2-second return without letting plates clank.'
+                        ],
+                        mistake: 'Using heavy weight and jerking your torso off the chest pad.',
+                        video: REF_VIDEOS.shoulders,
+                        searchQuery: 'reverse pec deck rear delt fly proper form'
+                    },
+                    {
                         id: 'sun-5',
                         name: "Captain's Chair Knee / Leg Raises",
                         tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
@@ -1260,7 +1297,7 @@
                     {
                         id: 'sun-6',
                         name: 'Zone 2 Incline Treadmill Walk',
-                        tag: 'Cardio Upgrade', tagStyle: 'bg-amber-100 text-amber-800',
+                        tag: 'Baked In • Cardio', tagStyle: 'bg-amber-100 text-amber-800',
                         equipment: 'Treadmill',
                         sets: '6–8% • 3.0–3.2 mph • 30–35 min',
                         effort: 'Zone 2 (60–70% Max HR)',
@@ -1273,7 +1310,7 @@
                             'Keep steady conversational rhythm for the full 30–35 minutes.',
                             'Aim for 8,000–10,000 average daily steps alongside these 4 gym sessions.'
                         ],
-                        mistake: 'Grabbing the rails or using Stair Stepper right after heavy Sunday leg work.',
+                        mistake: 'Grabbing the rails or turning Sunday into high-impact Stair Stepper sprints.',
                         video: null,
                         searchQuery: 'zone 2 cardio fat oxidation incline walking'
                     }
@@ -1444,7 +1481,13 @@
         let completedSteps = JSON.parse(localStorage.getItem('boulos_workout_done_v1') || '{}');
         let weightLogs = JSON.parse(localStorage.getItem('boulos_workout_logs_v1') || '{}');
         let sessionLogs = JSON.parse(localStorage.getItem('boulos_workout_sessions_v1') || '{}');
-        let cardioModes = {};
+
+        function getCardioType(step) {
+            if (!step) return null;
+            if (step.equipment === 'Treadmill') return 'treadmill';
+            if (step.equipment === 'Stair Stepper') return 'stepper';
+            return null;
+        }
 
         // --- Three.js Scene Variables ---
         let scene, camera, renderer, controls;
@@ -1872,12 +1915,14 @@
                 const isActive = !showDayHeatmap && idx === activeStepIndex;
                 const logs = weightLogs[step.id] || [];
                 const latest = logs[logs.length - 1];
-                const isCardio = step.equipment === 'Treadmill' || step.equipment === 'Treadmill / Stepper';
+                const cardioType = getCardioType(step);
                 const logPill = latest
                     ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">${
-                        isCardio
-                            ? (latest.mode === 'stepper' ? `Stepper L${latest.val} · ${latest.reps}m` : `${latest.val}% · ${latest.speed || 3.0} mph · ${latest.reps}m`)
-                            : `${latest.val} lb × ${latest.reps}`
+                        cardioType === 'stepper'
+                            ? `Stepper L${latest.val} · ${latest.reps}m`
+                            : cardioType === 'treadmill'
+                                ? `${latest.val}% · ${latest.speed || 3.0} mph · ${latest.reps}m`
+                                : `${latest.val} lb × ${latest.reps}`
                     }</span>`
                     : '';
                 return `
@@ -2075,15 +2120,6 @@
             input.value = Math.max(0, +(cur + delta).toFixed(1));
         }
 
-        function setCardioMode(stepId, mode) {
-            cardioModes[stepId] = mode;
-            const plan = workoutPlan[currentDay];
-            const step = plan?.steps[activeStepIndex];
-            if (step && step.id === stepId) {
-                openStepPanel(step, activeStepIndex, plan.steps.length, true);
-            }
-        }
-
         function saveStepLog(stepId) {
             const valEl = document.getElementById('log-val-input');
             const repsEl = document.getElementById('log-reps-input');
@@ -2095,9 +2131,8 @@
 
             const plan = workoutPlan[currentDay];
             const stepObj = plan?.steps.find(s => s.id === stepId);
-            const isCardio = stepObj && (stepObj.equipment === 'Treadmill' || stepObj.equipment === 'Treadmill / Stepper');
-            const logs = weightLogs[stepId] || [];
-            const mode = isCardio ? (cardioModes[stepId] || (logs[logs.length - 1]?.mode) || 'treadmill') : 'lift';
+            const cardioType = getCardioType(stepObj);
+            const mode = cardioType || 'lift';
             const speed = speedEl ? parseFloat(speedEl.value) : null;
 
             if (!weightLogs[stepId]) weightLogs[stepId] = [];
@@ -2142,46 +2177,40 @@
                 </div>`;
             }
             const logs = weightLogs[step.id] || [];
-            const isCardio = step.equipment === 'Treadmill' || step.equipment === 'Treadmill / Stepper';
-            const latest = logs[logs.length - 1];
-            const mode = isCardio ? (cardioModes[step.id] || latest?.mode || 'treadmill') : 'lift';
-            const isStepper = isCardio && mode === 'stepper';
+            const cardioType = getCardioType(step);
+            const isCardio = !!cardioType;
+            const isStepper = cardioType === 'stepper';
 
             const unit = isCardio ? (isStepper ? 'Lvl' : '%') : 'lb';
             const valLabel = isCardio ? (isStepper ? 'Level' : 'Incline %') : 'Weight (lb)';
             const repsLabel = isCardio ? 'Minutes' : 'Reps';
             const stepAmt = isCardio ? 1 : 5;
 
-            const sameModeLogs = isCardio ? logs.filter(l => (l.mode || 'treadmill') === mode) : logs;
-            const prevSame = sameModeLogs.length >= 2 ? sameModeLogs[sameModeLogs.length - 2] : null;
-            const latestSame = sameModeLogs[sameModeLogs.length - 1];
-            const bestVal = sameModeLogs.length ? Math.max(...sameModeLogs.map(l => l.val)) : null;
+            const matchingLogs = isCardio ? logs.filter(l => (l.mode || 'treadmill') === cardioType) : logs;
+            const latest = matchingLogs[matchingLogs.length - 1] || logs[logs.length - 1];
+            const prevSame = matchingLogs.length >= 2 ? matchingLogs[matchingLogs.length - 2] : null;
+            const latestSame = matchingLogs[matchingLogs.length - 1];
+            const bestVal = matchingLogs.length ? Math.max(...matchingLogs.map(l => l.val)) : null;
             const delta = latestSame && prevSame ? +(latestSame.val - prevSame.val).toFixed(1) : null;
             const deltaBadge = delta !== null && delta !== 0
                 ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold ${delta > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${delta > 0 ? '+' : ''}${delta} ${unit}</span>`
                 : '';
 
-            const defaultVal = latestSame ? latestSame.val : (isCardio ? (isStepper ? 6 : 6) : '');
+            const defaultVal = latestSame ? latestSame.val : (isCardio ? 6 : '');
             const defaultSpeed = latestSame?.speed || 3.0;
-            const defaultReps = latestSame ? latestSame.reps : (isCardio ? (step.id === 'wed-7' ? 20 : step.id === 'sun-6' ? 30 : 25) : 10);
-            const recent = logs.slice(-5);
+            const defaultReps = latestSame ? latestSame.reps : (isCardio ? (step.id === 'wed-7' ? 20 : step.id === 'sun-6' ? 30 : step.id === 'fri-7' ? 22 : 25) : 10);
+            const recent = matchingLogs.slice(-5);
             const maxBar = recent.length ? Math.max(...recent.map(r => r.val), 1) : 1;
 
-            const lastSummary = latest
-                ? (isCardio
-                    ? (latest.mode === 'stepper' ? `Stepper Lvl ${latest.val} · ${latest.reps}m` : `${latest.val}% · ${latest.speed || 3.0} mph · ${latest.reps}m`)
-                    : `${latest.val} lb × ${latest.reps}`)
+            const lastSummary = latestSame
+                ? (isStepper
+                    ? `Stepper Lvl ${latestSame.val} · ${latestSame.reps}m`
+                    : cardioType === 'treadmill'
+                        ? `${latestSame.val}% · ${latestSame.speed || 3.0} mph · ${latestSame.reps}m`
+                        : `${latestSame.val} lb × ${latestSame.reps}`)
                 : '';
 
-            const modeToggle = isCardio ? `
-                <div class="flex items-center gap-1 bg-white/90 p-0.5 rounded-lg border border-indigo-200">
-                    <button type="button" onclick="setCardioMode('${step.id}','treadmill')"
-                        class="px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors ${!isStepper ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:text-slate-900'}">Treadmill</button>
-                    <button type="button" onclick="setCardioMode('${step.id}','stepper')"
-                        class="px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors ${isStepper ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:text-slate-900'}">Stair Stepper</button>
-                </div>` : '';
-
-            const inputGrid = isCardio && !isStepper ? `
+            const inputGrid = cardioType === 'treadmill' ? `
                 <div class="grid grid-cols-12 gap-1.5 items-end">
                     <div class="col-span-4">
                         <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">${valLabel}</label>
@@ -2228,14 +2257,15 @@
                     </div>
                 </div>`;
 
+            const headerTitle = isStepper ? 'Stair Stepper Log' : cardioType === 'treadmill' ? 'Incline Walk &amp; Speed Log' : 'Weight &amp; Progress';
             return `
             <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-2.5">
                 <div class="flex items-center justify-between gap-2">
-                    <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">${isCardio ? 'Cardio &amp; Speed Log' : 'Weight &amp; Progress'}</div>
-                    ${modeToggle || `<div class="flex items-center gap-1.5 text-[11px]">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">${headerTitle}</div>
+                    <div class="flex items-center gap-1.5 text-[11px]">
                         ${bestVal !== null ? `<span class="font-semibold text-slate-700">PR: ${bestVal} ${unit}</span>` : `<span class="text-slate-400">No logs yet</span>`}
                         ${deltaBadge}
-                    </div>`}
+                    </div>
                 </div>
                 ${inputGrid}
                 ${recent.length ? `
@@ -2250,7 +2280,7 @@
                         }).join('')}
                     </div>
                     <div class="flex items-center justify-between text-[10px] text-slate-600">
-                        <span>Last: <strong>${lastSummary}</strong> (${latest.date.slice(5)})</span>
+                        <span>Last: <strong>${lastSummary}</strong> (${latestSame.date.slice(5)})</span>
                         <button type="button" onclick="undoLastLog('${step.id}')" class="text-rose-600 hover:underline font-semibold">Undo</button>
                     </div>
                 </div>` : ''}
@@ -2437,9 +2467,9 @@
                     <polyline points="104,58 78,74 128,74" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
                     <line x1="150" y1="64" x2="105" y2="64" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
                     ${pill(168, 22, isSupported ? 'Chest Glued to Pad' : 'Tall Spine (Zero Rocking)', '#065f46', '#ecfdf5', '#6ee7b7')}
-                    ${pill(168, 56, isSupported ? 'Grip Lower on Angled Bars (Palms Down)' : 'Full Reach Forward at Start', '#be123c', '#fff1f2', '#fda4af')}
-                    ${pill(168, 92, isSupported ? 'Yellow Center Post = 1-Arm Anchor' : 'Pull to Belly Button • Squeeze Blades', '#1e40af', '#eff6ff', '#93c5fd')}
-                `, isSupported ? 'PF Matrix Angled Handles' : 'Mid-Back Pull Path');
+                    ${pill(168, 56, isSupported ? 'Thumbs Up on Upright Bars (Below Tip)' : 'Full Reach Forward at Start', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(168, 92, isSupported ? 'Elbows ~45° • Yellow Post = 1-Arm' : 'Pull to Belly Button • Squeeze Blades', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, isSupported ? 'PF Matrix Upright Bars' : 'Mid-Back Pull Path');
             }
 
             // 6. Cable Face Pulls (mon-6b)
@@ -2484,31 +2514,44 @@
                 `, 'Shoulder Width Arc');
             }
 
-            // 8. Reverse Pec Deck + Shrugs (fri-6b)
+            // 8A. Reverse Pec Deck (fri-6b)
             if (id === 'fri-6b') {
                 return svgWrap(`
-                    <!-- Left: Reverse Pec Deck -->
-                    <rect x="12" y="10" width="162" height="134" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
-                    <text x="93" y="25" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">1. Reverse Pec Deck</text>
-                    <circle cx="93" cy="64" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
-                    <ellipse cx="93" cy="84" rx="22" ry="12" fill="#2563eb"/>
-                    <line x1="72" y1="78" x2="36" y2="86" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="114" y1="78" x2="150" y2="86" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
-                    <path d="M 54 52 Q 36 68 38 82" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
-                    <path d="M 132 52 Q 150 68 148 82" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
-                    ${pill(22, 114, 'Sweep Wide • Rear Delts', '#1e40af', '#eff6ff', '#93c5fd')}
-                    <!-- Right: DB/Smith Shrugs -->
-                    <rect x="186" y="10" width="162" height="134" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
-                    <text x="267" y="25" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">2. DB / Smith Shrugs</text>
-                    <circle cx="267" cy="48" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
-                    <rect x="251" y="60" width="32" height="44" rx="8" fill="#2563eb"/>
-                    <line x1="251" y1="64" x2="246" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="283" y1="64" x2="288" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
-                    <rect x="240" y="103" width="12" height="6" rx="2" fill="#334155"/>
-                    <rect x="282" y="103" width="12" height="6" rx="2" fill="#334155"/>
-                    <line x1="234" y1="78" x2="234" y2="54" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-g)"/>
-                    ${pill(194, 114, 'Straight Up & Back (1s Hold)', '#065f46', '#ecfdf5', '#6ee7b7')}
-                `, 'Rear Delt + Trap Yoke');
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <text x="98" y="20" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">Top-Down Reverse Fly Arc</text>
+                    <rect x="86" y="42" width="24" height="10" rx="4" fill="#64748b"/>
+                    <circle cx="98" cy="70" r="11" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <ellipse cx="98" cy="92" rx="26" ry="14" fill="#2563eb"/>
+                    <!-- Arms sweeping wide -->
+                    <line x1="74" y1="84" x2="32" y2="92" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="122" y1="84" x2="164" y2="92" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M 52 54 Q 30 70 32 88" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <path d="M 144 54 Q 166 70 164 88" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(184, 24, 'Hands @ Shoulder Height', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(184, 58, 'Sweep Out to Side Walls', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(184, 92, 'Chest on Pad • 2s Return', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Rear Delt Isolation');
+            }
+
+            // 8B. Smith Machine / DB Shrugs (sun-shrug)
+            if (id === 'sun-shrug') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="56" y1="16" x2="56" y2="138" stroke="#64748b" stroke-width="4"/>
+                    <line x1="158" y1="16" x2="158" y2="138" stroke="#64748b" stroke-width="4"/>
+                    <circle cx="107" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <rect x="89" y="52" width="36" height="44" rx="8" fill="#2563eb"/>
+                    <line x1="98" y1="96" x2="96" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="116" y1="96" x2="118" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="89" y1="58" x2="82" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="125" y1="58" x2="132" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Smith Bar -->
+                    <line x1="46" y1="104" x2="168" y2="104" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="72" y1="78" x2="72" y2="50" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-g)"/>
+                    ${pill(180, 24, 'Straight Up/Back to Ears', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(180, 58, '1s Squeeze • Full Stretch', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(180, 92, 'No Shoulder Rolling', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Vertical Trap Shrug');
             }
 
             // 9. Bicep Curls (fri-5) & Tricep Extension (fri-6)
@@ -2722,8 +2765,28 @@
                 `, 'Posterior Pelvic Tilt');
             }
 
-            // 18. Zone 2 Cardio (mon-7, wed-7, fri-7, sun-6)
-            if (id === 'mon-7' || id === 'wed-7' || id === 'fri-7' || id === 'sun-6') {
+            // 18A. Zone 2 Stair Stepper (fri-7)
+            if (id === 'fri-7') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Staircase Deck -->
+                    <polyline points="48,136 48,118 76,118 76,102 104,102 104,86 132,86 132,70 156,70" fill="none" stroke="#334155" stroke-width="6" stroke-linejoin="round"/>
+                    <line x1="150" y1="70" x2="160" y2="34" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+                    <rect x="146" y="28" width="22" height="8" rx="3" fill="#334155"/>
+                    <!-- Tall Climber -->
+                    <circle cx="104" cy="24" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="104" y1="34" x2="104" y2="70" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round"/>
+                    <polyline points="104,44 118,58 128,54" fill="none" stroke="#1d4ed8" stroke-width="4.5" stroke-linecap="round"/>
+                    <polyline points="104,70 86,88 86,114" fill="none" stroke="#2563eb" stroke-width="5.5" stroke-linecap="round"/>
+                    <polyline points="104,70 124,78 122,98" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    ${pill(184, 20, 'Level 5–7 • 20–25 min', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(184, 54, 'Hands Off Rails (Stand Tall)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(184, 88, 'Zone 2 HR (Full Sentences)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Baked-In Friday Stair Stepper');
+            }
+
+            // 18B. Zone 2 Incline Treadmill Walk (mon-7, wed-7, sun-6)
+            if (id === 'mon-7' || id === 'wed-7' || id === 'sun-6') {
                 return svgWrap(`
                     <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
                     <!-- Incline Treadmill Deck -->
@@ -2736,10 +2799,10 @@
                     <polyline points="104,58 118,74 128,72" fill="none" stroke="#1d4ed8" stroke-width="4.5" stroke-linecap="round"/>
                     <line x1="104" y1="88" x2="88" y2="122" stroke="#2563eb" stroke-width="5.5" stroke-linecap="round"/>
                     <line x1="104" y1="88" x2="124" y2="116" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
-                    ${pill(184, 20, '6–8% Grade • 3.0–3.2 mph', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(184, 20, id === 'wed-7' ? '6% Grade • 3.0 mph • 20–25m' : '6–8% Grade • 3.0–3.2 mph', '#1e40af', '#eff6ff', '#93c5fd')}
                     ${pill(184, 54, 'Hands Off Rails (+40% Burn)', '#065f46', '#ecfdf5', '#6ee7b7')}
-                    ${pill(184, 88, id === 'fri-7' ? 'Fri Option: Stair Stepper 20–25m' : 'Zone 2 HR (Full Sentences)', '#be123c', '#fff1f2', '#fda4af')}
-                `, 'Hands-Free Zone 2');
+                    ${pill(184, 88, 'Zone 2 HR (Full Sentences)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Hands-Free Zone 2 Walk');
             }
 
             // 19. Foam Roller + Wall Angels (mon-0) or Foam Roller (pos-4)
