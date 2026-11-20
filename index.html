@@ -981,45 +981,45 @@
                     },
                     {
                         id: 'fri-2',
-                        name: 'Chin-Ups (Palms In) or Lat Pulldown',
-                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Bodyweight / Cable',
+                        name: 'Lat Pulldown Machine',
+                        tag: 'Swapped for Control', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'PF Cable Pulldown',
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['lats'],
                         secondary: ['biceps', 'rhomboids', 'forearms'],
                         camera: 'back',
-                        why: 'Keeps your supinated (palms-facing-you) pull-up variation for 3 full sets to hit lower lats and pre-load biceps.',
-                        machineSetup: 'Shoulder-width underhand grip (use Lat Pulldown if hitting < 6 clean bodyweight reps).',
+                        why: 'Swapped in from Chin-Ups for smoother progression and strict control — keeps steady lat tension without bodyweight fatigue or kipping.',
+                        machineSetup: 'Lock knees snugly under the thigh pad so you stay anchored. Use a shoulder-width underhand or slightly wider-than-shoulder overhand grip (or neutral MAG bar if your PF has one).',
                         formCues: [
-                            'Start from a full overhead stretch with chest lifted slightly.',
-                            'Drive elbows down toward your sides rather than curling just with wrists.',
-                            'Control the 2-second descent on every rep.'
+                            'Start from a full overhead stretch with shoulders relaxed up slightly, then pull shoulders down first.',
+                            'Lean back just ~10–15°, lift chest tall, and pull the bar to your upper chest/collarbone.',
+                            'Drive elbows down toward your sides and control a slow 2–3s return.'
                         ],
-                        mistake: 'Kicking legs or stopping halfway down.',
+                        mistake: 'Leaning way back into a horizontal row or pulling behind the neck.',
                         video: REF_VIDEOS.back,
-                        searchQuery: 'chin ups vs lat pulldown proper form'
+                        searchQuery: 'lat pulldown proper form jeff nippard'
                     },
                     {
                         id: 'fri-3',
-                        name: 'Chest-Supported Row (Wide Grip)',
+                        name: 'Chest-Supported Row (PF Angled Handles)',
                         tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Row Machine',
+                        equipment: 'PF Matrix Row / Cable',
                         sets: '3 sets × 10–12 reps',
                         effort: '1–2 RIR • 90s rest',
                         primary: ['rhomboids', 'traps'],
                         secondary: ['rear_delts', 'lats'],
                         camera: 'back',
-                        why: 'Complements Monday’s low cable row with a slightly higher elbow angle to build rear delts and upper-back posture.',
-                        machineSetup: 'Set chest pad so your torso rests comfortably and arms reach full stretch without hitting the stops.',
+                        why: 'Complements Monday’s cable row with a higher 45–60° elbow angle for rear delts & upper-back posture.',
+                        machineSetup: 'The V-angled bars on PF’s Matrix row are ergonomic diverging handles (and the vertical center post with the yellow cap is a 1-arm anchor). Grip lower down on the straight rubber below the worn tip with palms facing down—or if the right bar feels crooked, hold the yellow center post with one hand and do 1-arm rows on the good side (or hop onto the Seated Cable Row nearby).',
                         formCues: [
-                            'Flare elbows ~45–60° out to emphasize upper back and rear delts.',
-                            'Squeeze shoulder blades together for 1 second at the top.',
-                            'Lower smoothly into a full scapular stretch.'
+                            'Set chest pad so arms get a full forward stretch while chest stays glued to the pad.',
+                            'Grip wider/lower (palms down) and flare elbows ~45–60° to hit upper back & rear delts.',
+                            'Squeeze shoulder blades together for 1 second at the top, then lower slowly.'
                         ],
-                        mistake: 'Lifting your chest off the pad to yank heavy weight.',
+                        mistake: 'Lifting your chest off the pad or gripping only the peeled top tip when one arm feels uneven.',
                         video: REF_VIDEOS.back,
-                        searchQuery: 'chest supported row machine proper form'
+                        searchQuery: 'matrix chest supported row machine proper form'
                     },
                     {
                         id: 'fri-4',
@@ -2358,8 +2358,8 @@
                 `, '30° Incline Angle');
             }
 
-            // 3. Pull-Ups / Chin-Ups (mon-2, fri-2)
-            if (id === 'mon-2' || id === 'fri-2') {
+            // 3A. Pull-Ups (mon-2)
+            if (id === 'mon-2') {
                 return svgWrap(`
                     <line x1="40" y1="22" x2="320" y2="22" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
                     <!-- Left: Dead Hang Start -->
@@ -2378,6 +2378,28 @@
                     <text x="245" y="138" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8">2. Drive Elbows to Pockets</text>
                     ${pill(142, 34, 'Shoulders Down', '#065f46', '#ecfdf5', '#6ee7b7')}
                 `, 'Full Range Pull');
+            }
+
+            // 3B. Lat Pulldown (fri-2)
+            if (id === 'fri-2') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="70" y1="14" x2="174" y2="14" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="118" y1="14" x2="118" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4 3"/>
+                    <rect x="86" y="102" width="46" height="10" rx="4" fill="#64748b"/>
+                    <rect x="114" y="88" width="22" height="8" rx="3" fill="#059669"/>
+                    <!-- Seated Slight 15 deg Lean -->
+                    <circle cx="94" cy="44" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="98" y1="54" x2="108" y2="102" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="108,102 138,102 138,136" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Bar Pulled to Collarbone -->
+                    <line x1="96" y1="54" x2="140" y2="54" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                    <polyline points="98,60 116,80 122,54" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="144" y1="26" x2="144" y2="54" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(174, 20, 'Pull to Upper Chest (~15° Lean)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(174, 54, 'Full Overhead Stretch at Top', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(174, 88, 'Lock Knees Under Thigh Pad', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Controlled Cable Pull');
             }
 
             // 4. Shoulder Press (mon-3)
@@ -2415,8 +2437,9 @@
                     <polyline points="104,58 78,74 128,74" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
                     <line x1="150" y1="64" x2="105" y2="64" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
                     ${pill(168, 22, isSupported ? 'Chest Glued to Pad' : 'Tall Spine (Zero Rocking)', '#065f46', '#ecfdf5', '#6ee7b7')}
-                    ${pill(168, 92, isSupported ? '45–60° Elbows • Upper Back' : 'Pull to Belly Button • Squeeze Blades', '#1e40af', '#eff6ff', '#93c5fd')}
-                `, isSupported ? '45–60° Upper-Back Pull' : 'Mid-Back Pull Path');
+                    ${pill(168, 56, isSupported ? 'Grip Lower on Angled Bars (Palms Down)' : 'Full Reach Forward at Start', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(168, 92, isSupported ? 'Yellow Center Post = 1-Arm Anchor' : 'Pull to Belly Button • Squeeze Blades', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, isSupported ? 'PF Matrix Angled Handles' : 'Mid-Back Pull Path');
             }
 
             // 6. Cable Face Pulls (mon-6b)
