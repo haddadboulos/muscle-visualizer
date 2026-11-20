@@ -91,6 +91,7 @@
                 right: 0;
                 bottom: auto;
                 height: 44dvh;
+                transition: height 0.24s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
             }
             #left-sidebar {
                 top: 44dvh;
@@ -99,6 +100,7 @@
                 bottom: 0;
                 width: 100%;
                 padding: 0;
+                transition: top 0.24s cubic-bezier(0.22, 1, 0.36, 1);
             }
             #day-panel, #explore-panel {
                 border-radius: 1.25rem 1.25rem 0 0;
@@ -118,6 +120,7 @@
                 border-radius: 1.25rem 1.25rem 0 0;
                 border-bottom: 0;
                 transform: translateY(110%);
+                transition: top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
             }
             #info-panel.mobile-open {
                 transform: translateY(0) !important;
@@ -132,7 +135,27 @@
                 left: 8px;
                 right: 8px;
                 justify-content: space-between;
+                transition: opacity 0.18s ease, transform 0.2s ease;
             }
+            body.mobile-compact #canvas-container {
+                height: 106px;
+                opacity: 0.25;
+                pointer-events: none;
+            }
+            body.mobile-compact #camera-dock {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(-8px);
+            }
+            body.mobile-compact #left-sidebar,
+            body.mobile-compact #info-panel {
+                top: 104px;
+            }
+            .mobile-3d-toggle { display: inline-flex; }
+            body.mobile-compact .mobile-3d-toggle { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        }
+        @media (min-width: 768px) {
+            .mobile-3d-toggle { display: none !important; }
         }
     </style>
 </head>
@@ -181,7 +204,10 @@
                         <h2 id="day-title" class="text-sm md:text-base font-bold text-slate-900 mt-1"></h2>
                         <p id="day-subtitle" class="hidden md:block text-xs text-slate-500 mt-0.5"></p>
                     </div>
-                    <button id="reset-progress-btn" title="Clear checkmarks for next workout (keeps weight logs)" class="text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1 rounded-lg transition-colors shrink-0">Clear Steps</button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="toggleMobileCompact()" class="mobile-3d-toggle px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 transition-colors">3D ↕</button>
+                        <button id="reset-progress-btn" title="Clear checkmarks for next workout (keeps weight logs)" class="text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1 rounded-lg transition-colors shrink-0">Clear Steps</button>
+                    </div>
                 </div>
                 <div class="mt-2 md:mt-3 flex items-center justify-between gap-2">
                     <div class="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
@@ -239,12 +265,15 @@
                 <h2 id="panel-title" class="text-base md:text-lg font-bold text-slate-900 leading-snug mt-0.5">Select an item</h2>
                 <p id="panel-subtitle" class="text-xs text-slate-500 mt-0.5 md:mt-1"></p>
             </div>
-            <button id="close-panel-btn" class="px-2.5 py-1 md:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 md:bg-transparent hover:bg-slate-200 transition-colors flex items-center gap-1 shrink-0">
-                <span class="md:hidden text-xs font-semibold">← Steps</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="hidden md:block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="toggleMobileCompact()" class="mobile-3d-toggle px-2 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 transition-colors">3D ↕</button>
+                <button id="close-panel-btn" class="px-2.5 py-1 md:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 md:bg-transparent hover:bg-slate-200 transition-colors flex items-center gap-1 shrink-0">
+                    <span class="md:hidden text-xs font-semibold">← Steps</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="hidden md:block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
         <div id="panel-content" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4"></div>
         <div id="panel-footer" class="p-3 border-t border-slate-200 bg-white/95 flex items-center justify-between gap-2 hidden shrink-0">
@@ -1813,6 +1842,8 @@
             dayPanel.classList.remove('hidden');
             explorePanel.classList.add('hidden');
             legend.classList.remove('hidden');
+            document.getElementById('sequence-list').scrollTop = 0;
+            setMobileCompact(false);
             renderDayPlan();
             selectStep(0, isMobile());
         }
@@ -2226,6 +2257,589 @@
             </div>`;
         }
 
+        // --- Mobile Scroll-to-Shrink 3D Viewport ---
+        let mobileCompactLockUntil = 0;
+        function setMobileCompact(compact) {
+            if (!isMobile()) {
+                document.body.classList.remove('mobile-compact');
+                return;
+            }
+            const has = document.body.classList.contains('mobile-compact');
+            if (has === compact) return;
+            mobileCompactLockUntil = Date.now() + 280;
+            document.body.classList.toggle('mobile-compact', compact);
+            setTimeout(onWindowResize, 250);
+        }
+
+        function toggleMobileCompact() {
+            setMobileCompact(!document.body.classList.contains('mobile-compact'));
+        }
+
+        function attachScrollShrink(el) {
+            if (!el) return;
+            el.addEventListener('scroll', () => {
+                if (!isMobile() || Date.now() < mobileCompactLockUntil) return;
+                if (el.scrollTop > 24) setMobileCompact(true);
+                else if (el.scrollTop <= 2) setMobileCompact(false);
+            }, { passive: true });
+        }
+
+        // --- Illustrated Form Diagrams (Crisp Light-Mode SVG per Exercise) ---
+        function renderFormIllustration(step) {
+            const svgWrap = (inner, caption) => `
+                <div class="p-3 rounded-xl bg-white border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Visual Form Guide</span>
+                        <span class="text-[10px] font-semibold text-blue-600">${caption}</span>
+                    </div>
+                    <svg viewBox="0 0 360 155" class="w-full h-auto rounded-lg bg-slate-50 border border-slate-200/80" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arr-r" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e11d48"/></marker>
+                            <marker id="arr-g" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#059669"/></marker>
+                        </defs>
+                        ${inner}
+                    </svg>
+                </div>`;
+
+            const pill = (x, y, text, color = '#0f172a', bg = '#ffffff', border = '#cbd5e1') => {
+                const w = Math.max(54, text.length * 5.6 + 12);
+                return `<rect x="${x}" y="${y}" width="${w}" height="17" rx="5" fill="${bg}" stroke="${border}" stroke-width="1"/>
+                        <text x="${x + w / 2}" y="${y + 11.5}" text-anchor="middle" font-size="9" font-weight="700" font-family="Inter,sans-serif" fill="${color}">${text}</text>`;
+            };
+
+            const id = step.id;
+            // 1. Flat Chest Press (fri-1)
+            if (id === 'fri-1') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Machine Seat & Backrest -->
+                    <rect x="78" y="34" width="12" height="72" rx="4" fill="#64748b"/>
+                    <rect x="78" y="100" width="46" height="10" rx="4" fill="#64748b"/>
+                    <line x1="90" y1="110" x2="90" y2="138" stroke="#475569" stroke-width="4"/>
+                    <!-- Person Seated -->
+                    <circle cx="96" cy="40" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="96" y1="50" x2="96" y2="100" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="96,100 132,102 132,136" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Pinned Scapula Marker -->
+                    <circle cx="88" cy="64" r="5" fill="#10b981"/>
+                    <!-- Nipple Line Guide -->
+                    <line x1="65" y1="70" x2="188" y2="70" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <!-- Arm & Press Path -->
+                    <polyline points="96,62 126,70 162,70" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="160" y="56" width="8" height="26" rx="3" fill="#334155"/>
+                    <line x1="168" y1="69" x2="205" y2="69" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <!-- Labels -->
+                    ${pill(178, 18, 'Shoulders Pinned Down & Back', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(195, 58, 'Handles @ Nipple Line', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(178, 92, '45° Elbow Tuck (Not Flared)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Setup & Press Path');
+            }
+
+            // 2. Incline Chest Press (mon-1)
+            if (id === 'mon-1') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- 30 deg Incline Bench -->
+                    <line x1="70" y1="110" x2="122" y2="54" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+                    <line x1="70" y1="110" x2="70" y2="138" stroke="#475569" stroke-width="4"/>
+                    <line x1="112" y1="88" x2="112" y2="138" stroke="#475569" stroke-width="4"/>
+                    <!-- Lifter -->
+                    <circle cx="128" cy="42" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="120" y1="52" x2="86" y2="98" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="86,98 118,108 124,136" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Press Arm Up -->
+                    <polyline points="116,60 132,74 132,32" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <rect x="122" y="25" width="20" height="7" rx="3" fill="#334155"/>
+                    <line x1="145" y1="62" x2="145" y2="30" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <circle cx="110" cy="64" r="4.5" fill="#10b981"/>
+                    ${pill(175, 22, 'Press Over Upper Chest', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(175, 56, '30° Bench • Blades Pinched', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(175, 90, '45° Elbows • 2–3s Lower', '#be123c', '#fff1f2', '#fda4af')}
+                `, '30° Incline Angle');
+            }
+
+            // 3. Pull-Ups / Chin-Ups (mon-2, fri-2)
+            if (id === 'mon-2' || id === 'fri-2') {
+                return svgWrap(`
+                    <line x1="40" y1="22" x2="320" y2="22" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Left: Dead Hang Start -->
+                    <circle cx="95" cy="64" r="9" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+                    <polyline points="80,24 84,56 95,74 95,114" fill="none" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="110" y1="24" x2="106" y2="56" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+                    <text x="95" y="138" text-anchor="middle" font-size="9.5" font-weight="700" fill="#64748b">1. Full Dead-Hang Stretch</text>
+                    <!-- Arrow -->
+                    <line x1="145" y1="78" x2="195" y2="78" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <!-- Right: Pulled Top -->
+                    <circle cx="245" cy="36" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <polyline points="224,24 220,58 236,52" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <polyline points="266,24 270,58 254,52" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="245" y1="45" x2="245" y2="96" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round"/>
+                    <line x1="220" y1="58" x2="228" y2="78" stroke="#059669" stroke-width="2" stroke-dasharray="3 2" marker-end="url(#arr-g)"/>
+                    <text x="245" y="138" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8">2. Drive Elbows to Pockets</text>
+                    ${pill(142, 34, 'Shoulders Down', '#065f46', '#ecfdf5', '#6ee7b7')}
+                `, 'Full Range Pull');
+            }
+
+            // 4. Shoulder Press (mon-3)
+            if (id === 'mon-3') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="82" y="44" width="12" height="62" rx="4" fill="#64748b"/>
+                    <rect x="82" y="100" width="44" height="10" rx="4" fill="#64748b"/>
+                    <circle cx="102" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="100" y1="50" x2="100" y2="100" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="100,100 134,102 134,136" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Forearms Vertical -->
+                    <polyline points="100,58 118,58 118,22" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="136" y1="58" x2="136" y2="20" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <line x1="90" y1="78" x2="112" y2="78" stroke="#059669" stroke-width="2"/>
+                    ${pill(168, 22, 'Press Overhead (No Lock Slam)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(168, 56, 'Start @ Chin/Ears • Vertical Forearm', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(168, 90, 'Brace Abs (Keep Ribs Down)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Vertical Press Alignment');
+            }
+
+            // 5. Seated Cable Row (mon-4) & Chest-Supported Row (fri-3)
+            if (id === 'mon-4' || id === 'fri-3') {
+                const isSupported = id === 'fri-3';
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="74" y="96" width="54" height="12" rx="4" fill="#64748b"/>
+                    ${isSupported ? `<line x1="126" y1="96" x2="138" y2="52" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>` : `<line x1="245" y1="20" x2="245" y2="138" stroke="#475569" stroke-width="5"/>`}
+                    <!-- Torso Tall -->
+                    <circle cx="104" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="102" y1="50" x2="${isSupported ? 114 : 98}" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="98,96 150,104 176,120" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Row Cable & Pull -->
+                    <line x1="146" y1="74" x2="245" y2="74" stroke="#475569" stroke-width="2" stroke-dasharray="4 3"/>
+                    <polyline points="104,58 78,74 128,74" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="150" y1="64" x2="105" y2="64" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(168, 22, isSupported ? 'Chest Glued to Pad' : 'Tall Spine (Zero Rocking)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(168, 92, isSupported ? '45–60° Elbows • Upper Back' : 'Pull to Belly Button • Squeeze Blades', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, isSupported ? '45–60° Upper-Back Pull' : 'Mid-Back Pull Path');
+            }
+
+            // 6. Cable Face Pulls (mon-6b)
+            if (id === 'mon-6b') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="60" y1="16" x2="60" y2="138" stroke="#475569" stroke-width="6"/>
+                    <circle cx="60" cy="46" r="6" fill="#0f172a"/>
+                    <!-- Lifter Standing -->
+                    <circle cx="176" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="176" y1="50" x2="176" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="176" y1="96" x2="168" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="176" y1="96" x2="188" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Cable + Rope to Forehead -->
+                    <line x1="64" y1="46" x2="132" y2="48" stroke="#334155" stroke-width="2.5"/>
+                    <polyline points="176,58 192,46 154,42" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="115" y1="36" x2="150" y2="36" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(212, 20, 'Pulley @ Eye Height', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(212, 52, 'Pull Rope to Forehead/Ears', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(212, 84, 'Rotate Thumbs Back (Fix Hunch)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Anti-Hunch External Rotation');
+            }
+
+            // 7. Lateral Raises (mon-5, fri-4)
+            if (id === 'mon-5' || id === 'fri-4') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <circle cx="120" cy="36" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <rect x="104" y="48" width="32" height="50" rx="8" fill="#2563eb"/>
+                    <line x1="112" y1="98" x2="110" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="128" y1="98" x2="130" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Arms Raised to Shoulder Level -->
+                    <line x1="104" y1="54" x2="54" y2="54" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="136" y1="54" x2="186" y2="54" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <rect x="46" y="49" width="8" height="12" rx="2" fill="#334155"/>
+                    <rect x="186" y="49" width="8" height="12" rx="2" fill="#334155"/>
+                    <line x1="40" y1="54" x2="200" y2="54" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <path d="M 164 88 Q 186 76 184 58" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(210, 22, 'Stop @ Shoulder Height', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(210, 54, 'Lead w/ Elbows Out Wide', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(210, 86, 'Sweep ~25° Forward (No Shrug)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Shoulder Width Arc');
+            }
+
+            // 8. Reverse Pec Deck + Shrugs (fri-6b)
+            if (id === 'fri-6b') {
+                return svgWrap(`
+                    <!-- Left: Reverse Pec Deck -->
+                    <rect x="12" y="10" width="162" height="134" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="93" y="25" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">1. Reverse Pec Deck</text>
+                    <circle cx="93" cy="64" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <ellipse cx="93" cy="84" rx="22" ry="12" fill="#2563eb"/>
+                    <line x1="72" y1="78" x2="36" y2="86" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="114" y1="78" x2="150" y2="86" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M 54 52 Q 36 68 38 82" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
+                    <path d="M 132 52 Q 150 68 148 82" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
+                    ${pill(22, 114, 'Sweep Wide • Rear Delts', '#1e40af', '#eff6ff', '#93c5fd')}
+                    <!-- Right: DB/Smith Shrugs -->
+                    <rect x="186" y="10" width="162" height="134" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="267" y="25" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">2. DB / Smith Shrugs</text>
+                    <circle cx="267" cy="48" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <rect x="251" y="60" width="32" height="44" rx="8" fill="#2563eb"/>
+                    <line x1="251" y1="64" x2="246" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="283" y1="64" x2="288" y2="104" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <rect x="240" y="103" width="12" height="6" rx="2" fill="#334155"/>
+                    <rect x="282" y="103" width="12" height="6" rx="2" fill="#334155"/>
+                    <line x1="234" y1="78" x2="234" y2="54" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-g)"/>
+                    ${pill(194, 114, 'Straight Up & Back (1s Hold)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                `, 'Rear Delt + Trap Yoke');
+            }
+
+            // 9. Bicep Curls (fri-5) & Tricep Extension (fri-6)
+            if (id === 'fri-5' || id === 'fri-6') {
+                const isBi = id === 'fri-5';
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <circle cx="110" cy="34" r="10" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="110" y1="44" x2="110" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="110" y1="96" x2="104" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="110" y1="96" x2="118" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="110" cy="82" r="4.5" fill="#10b981"/>
+                    ${isBi ? `
+                        <polyline points="110,54 110,82 142,56" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                        <circle cx="144" cy="54" r="5" fill="#334155"/>
+                        <path d="M 148 92 Q 158 76 150 60" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(175, 24, 'Elbows Pinned at Ribs', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(175, 58, 'Palms Up • Zero Back Swing', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(175, 92, 'Lower 2–3s to Full Stretch', '#be123c', '#fff1f2', '#fda4af')}
+                    ` : `
+                        <polyline points="110,54 128,74 156,96" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                        <path d="M 148 64 Q 162 76 162 94" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(175, 24, 'Upper Arms Locked Still', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(175, 58, 'Extend to Full Lockout (1s)', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(175, 92, 'Deep Elbow Bend on Return', '#be123c', '#fff1f2', '#fda4af')}
+                    `}
+                `, isBi ? 'Pinned Elbow Curl' : 'Full-Range Tricep Lockout');
+            }
+
+            // 10. Rope Cable Crunch (mon-6)
+            if (id === 'mon-6') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="65" y1="14" x2="65" y2="138" stroke="#475569" stroke-width="6"/>
+                    <line x1="65" y1="22" x2="128" y2="66" stroke="#334155" stroke-width="2.5"/>
+                    <!-- Kneeling Body Curling Spine -->
+                    <polyline points="154,134 122,134 124,98" fill="none" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M 124 98 Q 124 66 106 60" fill="none" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round"/>
+                    <circle cx="96" cy="60" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <circle cx="124" cy="98" r="5" fill="#10b981"/>
+                    <path d="M 136 52 Q 126 76 116 86" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(175, 22, 'Lock Rope @ Temples', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(175, 56, 'Curl Ribs → Pelvis (Round Spine)', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(175, 90, 'Freeze Hips (Do Not Sit Back)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                `, 'Spinal Flexion Crunch');
+            }
+
+            // 11. Leg Press (wed-1, sun-2)
+            if (id === 'wed-1' || id === 'sun-2') {
+                const isHigh = id === 'sun-2';
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Angled Sled Seat -->
+                    <line x1="62" y1="74" x2="86" y2="112" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+                    <line x1="86" y1="112" x2="122" y2="112" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+                    <!-- Lifter -->
+                    <circle cx="78" cy="64" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="82" y1="74" x2="96" y2="104" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="96,104 134,82 174,${isHigh ? 50 : 64}" fill="none" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Foot Plate -->
+                    <line x1="168" y1="36" x2="190" y2="86" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="96" cy="106" r="5" fill="#10b981"/>
+                    <line x1="142" y1="68" x2="168" y2="54" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(198, 22, isHigh ? 'Feet Higher/Wider (Glute Focus)' : 'Feet Shoulder-Width Mid-Sled', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(198, 56, 'Tailbone Glued to Pad', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(198, 90, 'Deep Bend • No Knee Slam Lock', '#be123c', '#fff1f2', '#fda4af')}
+                `, isHigh ? 'High-Stance Glute/Quad Press' : 'Balanced Mid-Sled Press');
+            }
+
+            // 12. Standing Glute Kickback (wed-2)
+            if (id === 'wed-2') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="76" y1="42" x2="76" y2="138" stroke="#475569" stroke-width="6"/>
+                    <circle cx="116" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="112" y1="50" x2="104" y2="90" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="110" y1="58" x2="78" y2="58" stroke="#1d4ed8" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="104" y1="90" x2="102" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Working Leg Pushing Back -->
+                    <line x1="104" y1="90" x2="164" y2="112" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M 122 126 Q 150 124 166 114" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <circle cx="104" cy="84" r="4.5" fill="#10b981"/>
+                    ${pill(184, 24, 'Square Hips • Brace Torso', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(184, 58, 'Drive Heel Straight Back (1s Hold)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(184, 92, 'Do Not Arch Lower Back', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Glute Extension Path');
+            }
+
+            // 13. Leg Extension (wed-3), Lying Curl (wed-4), Seated Curl (sun-3)
+            if (id === 'wed-3' || id === 'wed-4' || id === 'sun-3') {
+                if (id === 'wed-4') {
+                    return svgWrap(`
+                        <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="48" y1="96" x2="152" y2="96" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+                        <circle cx="56" cy="78" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                        <line x1="64" y1="84" x2="114" y2="86" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                        <polyline points="114,86 156,88 136,44" fill="none" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round"/>
+                        <circle cx="114" cy="88" r="5" fill="#10b981"/>
+                        <path d="M 182 86 Q 176 58 148 44" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(194, 24, 'Press Hips Flat Into Bench', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(194, 58, 'Knees Just Off Pad Edge', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(194, 92, 'Curl Heels to Glutes (3s Lower)', '#be123c', '#fff1f2', '#fda4af')}
+                    `, 'Prone Hamstring Curl');
+                }
+                const isExt = id === 'wed-3';
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="74" y="48" width="12" height="58" rx="4" fill="#64748b"/>
+                    <rect x="74" y="98" width="54" height="10" rx="4" fill="#64748b"/>
+                    <circle cx="94" cy="42" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="92" y1="52" x2="92" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="92" y1="96" x2="136" y2="96" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round"/>
+                    <circle cx="136" cy="96" r="5" fill="#10b981"/>
+                    ${isExt ? `
+                        <line x1="136" y1="96" x2="180" y2="96" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                        <path d="M 148 128 Q 174 122 180 104" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(194, 24, 'Align Knee w/ Machine Pivot', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(194, 58, 'Pad Just Above Ankles', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(194, 92, 'Full Lockout Squeeze • 2–3s Lower', '#be123c', '#fff1f2', '#fda4af')}
+                    ` : `
+                        <line x1="136" y1="96" x2="112" y2="132" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                        <rect x="112" y="84" width="26" height="8" rx="3" fill="#059669"/>
+                        <path d="M 176 96 Q 158 126 124 132" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(194, 24, 'Lock Lap Pad Tight on Thighs', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(194, 58, 'Start Full Straight-Leg Stretch', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(194, 92, 'Pull Heels Under Seat (1s Hold)', '#be123c', '#fff1f2', '#fda4af')}
+                    `}
+                `, isExt ? 'Knee-Pivot Alignment' : 'Locked-Lap Seated Curl');
+            }
+
+            // 14. Hip Abduction (wed-5) & Adduction (wed-6)
+            if (id === 'wed-5' || id === 'wed-6') {
+                const isAbd = id === 'wed-5';
+                return svgWrap(`
+                    <rect x="64" y="24" width="90" height="114" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="109" y="40" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">Top-Down Knee Path</text>
+                    <ellipse cx="109" cy="64" rx="16" ry="12" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="98" y1="72" x2="${isAbd ? 76 : 98}" y2="118" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="120" y1="72" x2="${isAbd ? 142 : 120}" y2="118" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                    ${isAbd ? `
+                        <line x1="88" y1="104" x2="72" y2="104" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        <line x1="130" y1="104" x2="146" y2="104" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ` : `
+                        <line x1="72" y1="104" x2="90" y2="104" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        <line x1="146" y1="104" x2="128" y2="104" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    `}
+                    ${pill(174, 28, isAbd ? 'Push Knees Apart (Outer Hip)' : 'Squeeze Knees In (Inner Thigh)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(174, 62, '1s Pause at Peak Contraction', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(174, 96, 'Control Return (No Clanking)', '#be123c', '#fff1f2', '#fda4af')}
+                `, isAbd ? 'Outer Glute Press Out' : 'Inner Thigh Squeeze');
+            }
+
+            // 15. DB / Smith RDL (sun-1)
+            if (id === 'sun-1') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Hip-Hinge Posture -->
+                    <polyline points="118,136 122,96 92,76" fill="none" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="92" y1="76" x2="144" y2="54" stroke="#1d4ed8" stroke-width="7.5" stroke-linecap="round"/>
+                    <circle cx="154" cy="48" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <!-- Arms & DBs Glued to Legs -->
+                    <line x1="136" y1="58" x2="128" y2="108" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <rect x="122" y="106" width="12" height="7" rx="2" fill="#334155"/>
+                    <!-- Hips Back Arrow -->
+                    <line x1="112" y1="76" x2="72" y2="76" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <!-- Fixed Knee Angle -->
+                    <circle cx="122" cy="96" r="4.5" fill="#10b981"/>
+                    ${pill(184, 22, 'Push Hips Straight Back', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(184, 56, 'Flat Spine • ~15° Fixed Knees', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(184, 90, 'Weights Glued to Thighs/Shins', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, 'Hip Hinge Mechanics');
+            }
+
+            // 16. Standing Calf Raise (sun-4)
+            if (id === 'sun-4') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="52" y="120" width="46" height="18" rx="3" fill="#64748b"/>
+                    <rect x="148" y="120" width="46" height="18" rx="3" fill="#64748b"/>
+                    <!-- 1. Deep Stretch Heel Drop -->
+                    <line x1="84" y1="36" x2="84" y2="116" stroke="#64748b" stroke-width="6.5" stroke-linecap="round"/>
+                    <polyline points="84,116 90,118 68,132" fill="none" stroke="#64748b" stroke-width="5.5" stroke-linecap="round"/>
+                    <text x="76" y="24" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">1. Deep 2s Pause</text>
+                    <!-- 2. High Tip-Toe Peak -->
+                    <line x1="180" y1="36" x2="180" y2="104" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round"/>
+                    <polyline points="180,104 186,118 170,100" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="198" y1="120" x2="198" y2="96" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <text x="176" y="24" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">2. High Tip-Toe (1s)</text>
+                    ${pill(216, 48, 'Straight Knees', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(216, 82, 'Zero Bouncing', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Full Stretch → Peak Raise');
+            }
+
+            // 17. Captain's Chair (sun-5)
+            if (id === 'sun-5') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="74" y="28" width="12" height="72" rx="4" fill="#64748b"/>
+                    <line x1="86" y1="54" x2="124" y2="54" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="80" y1="100" x2="80" y2="138" stroke="#475569" stroke-width="4"/>
+                    <circle cx="94" cy="30" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="92" y1="40" x2="92" y2="88" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="92,46 116,52 122,42" fill="none" stroke="#1d4ed8" stroke-width="4.5" stroke-linecap="round"/>
+                    <!-- Pelvis Curled Up -->
+                    <path d="M 92 88 Q 108 78 134 74" fill="none" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round"/>
+                    <path d="M 116 118 Q 134 102 134 80" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <circle cx="86" cy="76" r="4.5" fill="#10b981"/>
+                    ${pill(168, 22, 'Press Back Flat Against Pad', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(168, 56, 'Curl Tailbone Up Toward Ribs', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(168, 90, 'Lower Slowly (Zero Swing)', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, 'Posterior Pelvic Tilt');
+            }
+
+            // 18. Zone 2 Cardio (mon-7, wed-7, fri-7, sun-6)
+            if (id === 'mon-7' || id === 'wed-7' || id === 'fri-7' || id === 'sun-6') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Incline Treadmill Deck -->
+                    <line x1="48" y1="130" x2="162" y2="108" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="154" y1="110" x2="164" y2="42" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+                    <rect x="148" y="36" width="24" height="8" rx="3" fill="#334155"/>
+                    <!-- Tall Walker (Hands Off Rails) -->
+                    <circle cx="104" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="104" y1="50" x2="104" y2="88" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round"/>
+                    <polyline points="104,58 118,74 128,72" fill="none" stroke="#1d4ed8" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="104" y1="88" x2="88" y2="122" stroke="#2563eb" stroke-width="5.5" stroke-linecap="round"/>
+                    <line x1="104" y1="88" x2="124" y2="116" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
+                    ${pill(184, 20, '6–8% Grade • 3.0–3.2 mph', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(184, 54, 'Hands Off Rails (+40% Burn)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(184, 88, id === 'fri-7' ? 'Fri Option: Stair Stepper 20–25m' : 'Zone 2 HR (Full Sentences)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Hands-Free Zone 2');
+            }
+
+            // 19. Foam Roller + Wall Angels (mon-0) or Foam Roller (pos-4)
+            if (id === 'mon-0' || id === 'pos-4') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Supine over Foam Roller -->
+                    <circle cx="96" cy="112" r="10" fill="#f59e0b"/>
+                    <path d="M 52 104 Q 96 92 134 114" fill="none" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <circle cx="44" cy="110" r="8.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <polyline points="134,114 152,96 168,132" fill="none" stroke="#2563eb" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M 74 92 Q 52 94 48 104" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
+                    ${pill(186, 24, 'Roller @ Mid-Back Blades', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(186, 58, 'Drape Chest Open (30–60s)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(186, 92, id === 'mon-0' ? 'Then 10 Flat-Back Wall Angels' : 'Avoid Rolling Lower Back', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Thoracic Hunch Opener');
+            }
+
+            // 20. Clasped Chin Tuck + Pec Stretch (fri-0, pos-2)
+            if (id === 'fri-0' || id === 'pos-2') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Forward Head Ghost vs Aligned -->
+                    <line x1="108" y1="22" x2="108" y2="134" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <circle cx="122" cy="40" r="9" fill="#f1f5f9" stroke="#94a3b8" stroke-dasharray="3 2"/>
+                    <circle cx="108" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="108" y1="50" x2="108" y2="128" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <!-- Hands Clasped Behind Back -->
+                    <polyline points="108,58 92,82 104,96" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="126" y1="40" x2="112" y2="40" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(168, 22, 'Ears Aligned Over Shoulders', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(168, 56, 'Clasp Hands & Pin Blades Back', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(168, 90, 'Hold 10–15s × 3 (No Chin Drop)', '#be123c', '#fff1f2', '#fda4af')}
+                `, 'Ear-to-Shoulder Alignment');
+            }
+
+            // 21. Prone Y-T-W (pos-5)
+            if (id === 'pos-5') {
+                return svgWrap(`
+                    <rect x="14" y="14" width="102" height="126" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="65" y="30" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8">Y (Thumbs Up)</text>
+                    <line x1="65" y1="68" x2="65" y2="114" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="65" cy="56" r="8" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="65" y1="70" x2="36" y2="40" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="65" y1="70" x2="94" y2="40" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+
+                    <rect x="129" y="14" width="102" height="126" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="180" y="30" text-anchor="middle" font-size="10" font-weight="800" fill="#059669">T (Arms Out)</text>
+                    <line x1="180" y1="68" x2="180" y2="114" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="180" cy="56" r="8" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="144" y1="74" x2="216" y2="74" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+
+                    <rect x="244" y="14" width="102" height="126" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+                    <text x="295" y="30" text-anchor="middle" font-size="10" font-weight="800" fill="#be123c">W (Squeeze Down)</text>
+                    <line x1="295" y1="68" x2="295" y2="114" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="295" cy="56" r="8" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                    <polyline points="268,54 270,82 295,74" fill="none" stroke="#be123c" stroke-width="5" stroke-linecap="round"/>
+                    <polyline points="322,54 320,82 295,74" fill="none" stroke="#be123c" stroke-width="5" stroke-linecap="round"/>
+                `, 'Top-Down Scapular Angles');
+            }
+
+            // 22. Wall Angels + Stretches (pos-6)
+            if (id === 'pos-6') {
+                return svgWrap(`
+                    <line x1="78" y1="14" x2="78" y2="138" stroke="#334155" stroke-width="5"/>
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <circle cx="90" cy="40" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="88" y1="50" x2="88" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="88" y1="96" x2="96" y2="136" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                    <polyline points="88,58 84,36 84,22" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                    <circle cx="84" cy="86" r="4" fill="#10b981"/>
+                    <circle cx="84" cy="56" r="4" fill="#10b981"/>
+                    <circle cx="82" cy="40" r="4" fill="#10b981"/>
+                    <line x1="106" y1="48" x2="106" y2="22" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    ${pill(138, 22, 'Head, Blades & Low Back Touch Wall', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(138, 56, 'Slide Arms Y ↔ W Slowly (45s)', '#1e40af', '#eff6ff', '#93c5fd')}
+                    ${pill(138, 90, 'Then Wall Pec + Gentle Neck Stretch', '#be123c', '#fff1f2', '#fda4af')}
+                `, '3-Point Wall Alignment');
+            }
+
+            // 23. Towel Neck Extension (pos-3) or Neck Mobility (pos-1)
+            if (id === 'pos-3' || id === 'pos-1') {
+                return svgWrap(`
+                    <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                    <circle cx="110" cy="48" r="11" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="110" y1="59" x2="110" y2="128" stroke="#2563eb" stroke-width="7.5" stroke-linecap="round"/>
+                    ${id === 'pos-3' ? `
+                        <path d="M 98 44 Q 100 54 148 64" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round"/>
+                        <polyline points="110,68 134,74 148,64" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/>
+                        <line x1="124" y1="46" x2="94" y2="46" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                        ${pill(174, 24, 'Towel @ Upper Back of Head', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(174, 58, 'Arms Pull Forward, Head Presses Back', '#be123c', '#fff1f2', '#fda4af')}
+                        ${pill(174, 92, 'Hold 10–15s × 3 Tall Spine', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ` : `
+                        <path d="M 92 32 Q 110 20 128 32" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arr-r)"/>
+                        ${pill(168, 24, '10s Slow L/R Rotations', '#1e40af', '#eff6ff', '#93c5fd')}
+                        ${pill(168, 58, '10s Gentle Chin Tuck & Nod', '#065f46', '#ecfdf5', '#6ee7b7')}
+                        ${pill(168, 92, '10s Ear-to-Ceiling Side Tilt', '#be123c', '#fff1f2', '#fda4af')}
+                    `}
+                `, id === 'pos-3' ? 'Towel Resistance Hold' : '3-Plane Neck Warm-Up');
+            }
+
+            // 24. Weighted Supine Neck Curl (mon-7b, fri-6c, pos-7)
+            return svgWrap(`
+                <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
+                <!-- Flat Bench -->
+                <rect x="78" y="88" width="112" height="12" rx="4" fill="#64748b"/>
+                <line x1="94" y1="100" x2="94" y2="138" stroke="#475569" stroke-width="4"/>
+                <line x1="174" y1="100" x2="174" y2="138" stroke="#475569" stroke-width="4"/>
+                <!-- Body Supine w/ Head Off Edge -->
+                <line x1="82" y1="80" x2="178" y2="80" stroke="#2563eb" stroke-width="7.5" stroke-linecap="round"/>
+                <polyline points="178,80 198,84 204,132" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="62" cy="74" r="9.5" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                <!-- Towel + Light DB on Forehead -->
+                <rect x="55" y="59" width="14" height="6" rx="2" fill="#f59e0b"/>
+                <rect x="54" y="51" width="16" height="7" rx="2" fill="#334155"/>
+                <path d="M 46 88 Q 50 66 64 62" fill="none" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                ${pill(194, 22, 'Head & Neck Off Bench Edge', '#065f46', '#ecfdf5', '#6ee7b7')}
+                ${pill(194, 54, 'Towel + Light DB @ Forehead', '#1e40af', '#eff6ff', '#93c5fd')}
+                ${pill(194, 86, 'Micro Chin-Tuck First → Slow Curl', '#be123c', '#fff1f2', '#fda4af')}
+            `, 'Controlled Neck Flexion');
+        }
+
         function updateDoneButton(stepId) {
             const btn = document.getElementById('toggle-done-btn');
             const isDone = !!completedSteps[stepId];
@@ -2279,8 +2893,23 @@
                 </a>`;
             }
 
-            document.getElementById('panel-content').innerHTML = `
+            const panelContent = document.getElementById('panel-content');
+            panelContent.innerHTML = `
                 ${renderLogCard(step)}
+
+                ${renderFormIllustration(step)}
+
+                <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Machine / Setup</div>
+                    <p class="text-xs text-slate-700 leading-relaxed">${step.machineSetup}</p>
+                    <div class="pt-2 border-t border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">Form Cues</div>
+                    <ul class="space-y-1.5 text-xs text-slate-700">
+                        ${step.formCues.map(c => `<li class="flex gap-2"><span class="text-blue-600 font-bold">•</span><span>${c}</span></li>`).join('')}
+                    </ul>
+                    <div class="pt-2 border-t border-slate-100 text-xs text-rose-700 bg-rose-50/70 rounded-lg p-2">
+                        <strong>Avoid:</strong> ${step.mistake}
+                    </div>
+                </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
@@ -2298,20 +2927,10 @@
                     <p class="text-xs text-slate-700 mt-1 leading-relaxed">${step.why}</p>
                 </div>
 
-                <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
-                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Machine / Setup</div>
-                    <p class="text-xs text-slate-700 leading-relaxed">${step.machineSetup}</p>
-                    <div class="pt-2 border-t border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">Form Cues</div>
-                    <ul class="space-y-1.5 text-xs text-slate-700">
-                        ${step.formCues.map(c => `<li class="flex gap-2"><span class="text-blue-600 font-bold">•</span><span>${c}</span></li>`).join('')}
-                    </ul>
-                    <div class="pt-2 border-t border-slate-100 text-xs text-rose-700 bg-rose-50/70 rounded-lg p-2">
-                        <strong>Avoid:</strong> ${step.mistake}
-                    </div>
-                </div>
-
                 ${videoHtml}
             `;
+            panelContent.scrollTop = 0;
+            setMobileCompact(false);
 
             const footer = document.getElementById('panel-footer');
             footer.classList.remove('hidden');
@@ -2371,6 +2990,7 @@
             const el = document.getElementById('info-panel');
             el.classList.add('md:translate-x-[110%]');
             el.classList.remove('mobile-open');
+            setMobileCompact(false);
             if (currentDay === 'explore') {
                 highlightMuscles([], [], true);
             }
@@ -2454,6 +3074,8 @@
         });
 
         initThree();
+        attachScrollShrink(document.getElementById('panel-content'));
+        attachScrollShrink(document.getElementById('sequence-list'));
         selectDay('mon');
     </script>
 </body>
