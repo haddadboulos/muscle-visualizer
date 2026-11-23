@@ -611,13 +611,14 @@
                         name: 'Incline DB or Smith Machine Chest Press',
                         tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
                         equipment: 'DBs / Smith Machine',
+                        perArm: true,
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['upper_chest'],
                         secondary: ['front_delts', 'triceps', 'middle_chest'],
                         camera: 'front',
                         why: 'Your old routine had 0 chest exercises. Pressing on a 30° incline builds upper chest fullness, burns high calories, and balances all your pulling.',
-                        machineSetup: 'Set bench or machine seat so handles align with upper chest/collarbone. Keep feet planted and shoulder blades pinched back into the pad.',
+                        machineSetup: 'Set bench to ~30° so handles/DBs align with upper chest. Keep feet planted, shoulder blades pinched back, and log dumbbell weight per arm.',
                         formCues: [
                             'Lower the weight under a 2–3 second count until dumbbells/handles reach chest level.',
                             'Keep elbows tucked ~45° from your ribs rather than flared straight out at 90°.',
@@ -631,7 +632,10 @@
                         id: 'mon-2',
                         name: 'Neutral-Grip Pull-Ups (or Chin/Pull Mix)',
                         tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Bodyweight / Assisted',
+                        equipment: 'Bodyweight',
+                        noWeightLog: true,
+                        noWeightTitle: 'Bodyweight Pull',
+                        noWeightBadge: 'Bodyweight',
                         sets: '3 sets × 6–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['lats'],
@@ -650,16 +654,17 @@
                     },
                     {
                         id: 'mon-3',
-                        name: 'Shoulder Press Machine (or Seated DB Press)',
+                        name: 'Seated DB or Machine Shoulder Press',
                         tag: 'New Gap-Filler', tagStyle: 'bg-emerald-100 text-emerald-700',
-                        equipment: 'Machine / Dumbbells',
+                        equipment: 'Dumbbells / Machine',
+                        perArm: true,
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 90s rest',
                         primary: ['front_delts', 'side_delts'],
                         secondary: ['triceps', 'upper_chest', 'serratus'],
                         camera: 'front',
                         why: 'Your old routine had zero overhead pressing. Stronger, broader delts create upper-body proportion above the waist.',
-                        machineSetup: 'Adjust seat so handles start right at chin/shoulder height with forearms vertical.',
+                        machineSetup: 'Sit tall with dumbbells/handles starting right at chin/shoulder height, forearms vertical. Log the weight held in each arm.',
                         formCues: [
                             'Brace your abs tight so your lower back does not arch off the pad.',
                             'Press smoothly overhead without slamming weights at the top.',
@@ -667,7 +672,7 @@
                         ],
                         mistake: 'Flaring ribs and turning the press into an incline chest press.',
                         video: REF_VIDEOS.shoulders,
-                        searchQuery: 'machine shoulder press proper form'
+                        searchQuery: 'seated dumbbell shoulder press proper form'
                     },
                     {
                         id: 'mon-4',
@@ -694,7 +699,8 @@
                         id: 'mon-5',
                         name: 'Lateral Raise Machine (or Cable/DB)',
                         tag: 'New V-Taper Key', tagStyle: 'bg-emerald-100 text-emerald-700',
-                        equipment: 'Machine / Cable',
+                        equipment: 'Dumbbells / Cable',
+                        perArm: true,
                         sets: '3 sets × 12–15 reps',
                         effort: '0–1 RIR • 60s rest',
                         primary: ['side_delts'],
@@ -757,7 +763,10 @@
                         id: 'mon-7b',
                         name: 'Neck Thickener (Curl + Towel Extension)',
                         tag: 'Neck Growth • 2×/Wk', tagStyle: 'bg-violet-100 text-violet-800',
-                        equipment: 'Flat Bench + Towel/DB',
+                        equipment: 'Flat Bench + Towel',
+                        noWeightLog: true,
+                        noWeightTitle: 'Bodyweight / Towel Neck Drill',
+                        noWeightBadge: 'Towel / Light',
                         sets: '2 sets × 15–20 each',
                         effort: 'Controlled • Zero Jerking',
                         primary: ['neck_flexors', 'neck_extensors'],
@@ -951,7 +960,10 @@
                         id: 'fri-6c',
                         name: 'Neck Thickener (Curl + Towel Extension)',
                         tag: 'Neck 2×/Wk • From Fri', tagStyle: 'bg-violet-100 text-violet-800',
-                        equipment: 'Flat Bench + Towel/DB',
+                        equipment: 'Flat Bench + Towel',
+                        noWeightLog: true,
+                        noWeightTitle: 'Bodyweight / Towel Neck Drill',
+                        noWeightBadge: 'Towel / Light',
                         sets: '2 sets × 15–20 each',
                         effort: 'Controlled • Zero Jerking',
                         primary: ['neck_flexors', 'neck_extensors'],
@@ -1083,6 +1095,7 @@
                         name: 'Dumbbell or Cable Lateral Raises',
                         tag: 'New V-Taper Key', tagStyle: 'bg-emerald-100 text-emerald-700',
                         equipment: 'Dumbbells / Cable',
+                        perArm: true,
                         sets: '3 sets × 12–15 reps',
                         effort: '0–1 RIR • 60s rest',
                         primary: ['side_delts'],
@@ -1104,6 +1117,7 @@
                         name: 'Dumbbell Bicep Curls (Free Weights)',
                         tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
                         equipment: 'Dumbbells',
+                        perArm: true,
                         sets: '3 sets × 8–12 reps',
                         effort: '1 RIR • 60s rest',
                         primary: ['biceps'],
@@ -1144,29 +1158,30 @@
             },
             sun: {
                 badge: 'Day 4 • Sunday',
-                title: 'Lower B — Posterior Chain, Yoke & Rear Delts',
-                subtitle: 'Balances Wednesday with RDLs + Smith Shrugs (paired), Leg Press, Seated Curl, Calves, Reverse Pec Deck (separate step), Captain’s Chair & Zone 2.',
+                title: 'Lower B — Free-Weight Hinge, Curls & Yoke',
+                subtitle: 'Free-weight DB RDLs + Shrugs, Leg Press, Lying Leg Curl, Calf Extension, Reverse Pec Deck, bodyweight Captain’s Chair & Incline Treadmill last.',
                 steps: [
                     {
                         id: 'sun-1',
-                        name: 'Dumbbell or Smith Machine RDL',
-                        tag: 'PF-Friendly Hinge', tagStyle: 'bg-emerald-100 text-emerald-700',
-                        equipment: 'DBs (to 75lb) / Smith',
+                        name: 'Dumbbell Romanian Deadlift (Free Weights)',
+                        tag: 'Free Weights • Hinge', tagStyle: 'bg-emerald-100 text-emerald-700',
+                        equipment: 'Dumbbells (Each Arm)',
+                        perArm: true,
                         sets: '3 sets × 8–10 reps',
                         effort: '1–2 RIR • 2 min rest',
                         primary: ['hamstrings', 'glute_maximus'],
                         secondary: ['erector_spinae', 'traps', 'forearms'],
                         camera: 'back',
-                        why: 'Planet Fitness San Jose has DBs up to 75 lb and Smith Machines (no Trap Bars/free Olympic barbells). Smith or DB RDLs give heavy hamstring/glute work cleanly inside PF.',
-                        machineSetup: 'Hold DBs at thighs (or stand under PF Smith bar; note unloaded bar feels ~15–20 lb). Unlock knees ~15° and lock that knee angle.',
+                        why: 'Free-weight dumbbells let your hips move naturally without being locked into a fixed rail (PF dumbbells go up to 75 lb per hand). Log weight per hand.',
+                        machineSetup: 'Stand tall holding a dumbbell in each hand right in front of your thighs, feet hip-width apart. Unlock knees ~15° and keep that angle fixed.',
                         formCues: [
-                            'Push your hips straight back toward the wall behind you while keeping weights glued to your legs.',
+                            'Push your hips straight back toward the wall behind you while keeping dumbbells gliding along your thighs/shins.',
                             'Stop as soon as your hips stop moving back (mid-shin level) with a deep hamstring stretch.',
                             'Drive hips forward aggressively to stand tall without leaning back at the top.'
                         ],
                         mistake: 'Rounding your lower back or turning it into a squat by bending knees too much.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'smith machine or dumbbell romanian deadlift proper form'
+                        searchQuery: 'dumbbell romanian deadlift proper form jeff nippard'
                     },
                     {
                         id: 'sun-shrug',
@@ -1178,7 +1193,7 @@
                         primary: ['traps'],
                         secondary: ['forearms', 'neck_extensors'],
                         camera: 'front',
-                        why: 'Separated from Reverse Pec Deck and paired right after Smith/DB RDLs so you use the same Smith bar or dumbbells with zero extra station wait while building upper traps.',
+                        why: 'Separated from Reverse Pec Deck and placed right after DB RDLs while your upper back and grip are already warmed up — use the Smith Machine (or heavy DBs) to build upper-trap yoke.',
                         machineSetup: 'Stand tall holding the Smith bar (unloaded feels ~15–20 lb + added plates) or heavy DBs right in front of thighs, arms straight.',
                         formCues: [
                             'Lean torso forward just ~10° and shrug straight up and slightly back toward your ears.',
@@ -1212,45 +1227,45 @@
                     },
                     {
                         id: 'sun-3',
-                        name: 'Seated Leg Curl (or Lying Curl)',
-                        tag: 'Kept & Upgraded', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Machine',
+                        name: 'Lying Leg Curl',
+                        tag: 'Preferred • Lying Curl', tagStyle: 'bg-blue-100 text-blue-700',
+                        equipment: 'PF Lying Curl Machine',
                         sets: '3 sets × 10–12 reps',
                         effort: '1 RIR • 90s rest',
                         primary: ['hamstrings'],
                         secondary: ['calves'],
                         camera: 'back',
-                        why: 'Seated curls stretch the hamstrings more at the hip than lying curls, giving 2×/week complete hamstring growth.',
-                        machineSetup: 'Lock the thigh lap pad down tight so your legs cannot lift, and adjust backrest upright.',
+                        why: 'Preferred prone setup that feels more natural on your knees/hips while delivering a second weekly knee-flexion hamstring hit.',
+                        machineSetup: 'Lie face down with knees aligned just off the edge of the bench pad and ankle roller sitting right above your heels.',
                         formCues: [
-                            'Pull heels down and back under the seat smoothly.',
-                            'Pause 1 second at full contraction.',
-                            'Return slowly over 3 seconds all the way to full straight-leg stretch.'
+                            'Press your hips/pelvis firmly down into the bench the entire set.',
+                            'Curl heels toward glutes smoothly and pause 1 beat at peak contraction.',
+                            'Lower slowly over 3 seconds all the way to near-straight legs.'
                         ],
-                        mistake: 'Leaving the lap pad loose and slouching forward.',
+                        mistake: 'Letting your hips pop up off the pad as you curl.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'seated leg curl proper form'
+                        searchQuery: 'lying leg curl machine proper form'
                     },
                     {
                         id: 'sun-4',
-                        name: 'Standing or Seated Calf Raise',
+                        name: 'Calf Extension Machine',
                         tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
-                        equipment: 'Calf Machine',
+                        equipment: 'PF Calf Extension',
                         sets: '3 sets × 12–15 reps',
                         effort: '0–1 RIR • 60s rest',
                         primary: ['calves'],
                         secondary: [],
-                        camera: 'back',
-                        why: 'Kept your calf raises ("calf curls") and added a bottom pause — calves respond poorly to bouncing reps.',
-                        machineSetup: 'Place balls of feet firmly on the block so heels can drop deep below parallel.',
+                        camera: 'side',
+                        why: 'Seated horizontal calf extension hits both gastrocnemius & soleus comfortably with straighter legs and zero shoulder/spine compression.',
+                        machineSetup: 'Sit upright, extend legs forward with a tiny knee micro-bend (not slammed locked), and place balls of feet on the bottom half of the footplate.',
                         formCues: [
-                            'Pause for a full 2 seconds in the bottom stretch on every single rep.',
-                            'Drive up onto your big toes as high as possible and hold 1 second.',
-                            'Keep knees straight on standing raises (hits gastrocnemius).'
+                            'Let toes flex back toward your shins for a full 2-second stretch pause on every rep.',
+                            'Press forward smoothly through your big toes/balls of feet and hold peak contraction for 1 second.',
+                            'Keep hips and lower back planted evenly in the seat.'
                         ],
-                        mistake: 'Bouncing rapidly through the bottom using Achilles tendon elasticity.',
+                        mistake: 'Bouncing rapidly through the bottom stretch or bending knees mid-rep.',
                         video: REF_VIDEOS.legs,
-                        searchQuery: 'standing calf raise proper form stretch'
+                        searchQuery: 'seated calf extension machine proper form'
                     },
                     {
                         id: 'fri-6b',
@@ -1276,8 +1291,11 @@
                     {
                         id: 'sun-5',
                         name: "Captain's Chair Knee / Leg Raises",
-                        tag: 'Kept from Yours', tagStyle: 'bg-blue-100 text-blue-700',
+                        tag: 'Kept • Bodyweight', tagStyle: 'bg-blue-100 text-blue-700',
                         equipment: "Captain's Chair",
+                        noWeightLog: true,
+                        noWeightTitle: 'Bodyweight Core Move',
+                        noWeightBadge: 'Bodyweight',
                         sets: '3 sets × 12–15 reps',
                         effort: '1 RIR • 60s rest',
                         primary: ['abs'],
@@ -1916,13 +1934,17 @@
                 const logs = weightLogs[step.id] || [];
                 const latest = logs[logs.length - 1];
                 const cardioType = getCardioType(step);
+                const prog = !cardioType && !step.noWeightLog ? computeStepProgression(step, logs) : null;
+                const progPill = prog && prog.badge
+                    ? `<span class="px-1.5 py-0.5 rounded ${prog.badgeClass} font-bold text-[10px]">${prog.badge}</span>`
+                    : '';
                 const logPill = latest
                     ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">${
                         cardioType === 'stepper'
                             ? `Stepper L${latest.val} · ${latest.reps}m`
                             : cardioType === 'treadmill'
                                 ? `${latest.val}% · ${latest.speed || 3.0} mph · ${latest.reps}m`
-                                : `${latest.val} lb × ${latest.reps}`
+                                : `${latest.val} ${step.perArm ? 'lb/arm' : 'lb'} × ${latest.reps}${latest.rir !== undefined ? ` @${latest.rir}RIR` : ''}`
                     }</span>`
                     : '';
                 return `
@@ -1943,6 +1965,7 @@
                                 <span>•</span>
                                 <span>${step.equipment}</span>
                                 ${logPill}
+                                ${progPill}
                             </div>
                         </div>
                     </div>
@@ -2120,10 +2143,117 @@
             input.value = Math.max(0, +(cur + delta).toFixed(1));
         }
 
+        function parseStepTargets(step) {
+            const m = (step.sets || '').match(/(\d+)\s*[–-]\s*(\d+)\s*reps/i);
+            const repMin = m ? parseInt(m[1], 10) : 8;
+            const repMax = m ? parseInt(m[2], 10) : 12;
+            const rirM = (step.effort || '').match(/(\d+(?:\.\d+)?)(?:\s*[–-]\s*(\d+(?:\.\d+)?))?\s*RIR/i);
+            const targetRir = rirM ? parseFloat(rirM[2] || rirM[1]) : 2;
+            const isLegHeavy = /leg press|rdl|calf|deadlift/i.test(step.name || '');
+            const inc = isLegHeavy ? 10 : 5;
+            return { repMin, repMax, targetRir, inc };
+        }
+
+        function computeStepProgression(step, logs) {
+            const { repMin, repMax, targetRir, inc } = parseStepTargets(step);
+            const wtUnit = step.perArm ? 'lb/arm' : 'lb';
+            if (!logs || !logs.length) {
+                return {
+                    badge: `Calibrate ${repMin}–${repMax}`,
+                    badgeClass: 'bg-sky-50 text-sky-700 border border-sky-200',
+                    action: 'CALIBRATE',
+                    title: `Day 1 Calibration (${repMin}–${repMax} reps @ ~${targetRir} RIR)`,
+                    detail: `Pick a weight${step.perArm ? ' (per arm)' : ''} where the last 2 reps feel hard (${targetRir} RIR). Log it below and your next realistic push unlocks automatically.`,
+                    applyVal: null,
+                    applyReps: repMin
+                };
+            }
+            const last = logs[logs.length - 1];
+            const w = parseFloat(last.val) || 0;
+            const reps = parseInt(last.reps, 10) || repMin;
+            const rir = last.rir !== undefined ? parseFloat(last.rir) : targetRir;
+            const e1rm = Math.round(w * (1 + reps / 30) * 10) / 10;
+
+            let stalled = false;
+            if (logs.length >= 3) {
+                const last3 = logs.slice(-3);
+                const sameW = last3.every(l => Math.abs((parseFloat(l.val) || 0) - w) < 0.1);
+                if (sameW && last3[2].reps <= last3[0].reps) stalled = true;
+            }
+
+            if (reps >= repMax && rir <= targetRir + 0.5) {
+                const nextW = Math.max(w + inc, Math.round((w * 1.05) / inc) * inc);
+                const startReps = Math.max(repMin, Math.min(repMax - 1, Math.floor(30 * (e1rm / nextW - 1))));
+                return {
+                    badge: `↑ ${nextW}${wtUnit} × ${startReps}`,
+                    badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+                    action: 'UP_WEIGHT',
+                    title: `Earn Load Bump → Try ${nextW} ${wtUnit} × ${startReps} reps`,
+                    detail: `Cleared top of range (${w} ${wtUnit} × ${reps} @ ${rir} RIR, est. 1RM ${e1rm} ${wtUnit}). Add +${nextW - w} ${wtUnit} and rebuild from ${startReps} reps.`,
+                    applyVal: nextW,
+                    applyReps: startReps
+                };
+            }
+            if (rir >= targetRir + 2 && reps >= repMin) {
+                const nextW = w + inc;
+                return {
+                    badge: `⚡ Jump ${nextW}${wtUnit}`,
+                    badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300',
+                    action: 'AUTOREG_UP',
+                    title: `Too Light (${rir} RIR) → Jump to ${nextW} ${wtUnit}`,
+                    detail: `RIR ${rir} left extra mechanical tension on the table. Bump +${inc} ${wtUnit} to ${nextW} ${wtUnit} for ${repMin}–${repMax} reps.`,
+                    applyVal: nextW,
+                    applyReps: Math.min(repMax, reps)
+                };
+            }
+            if (stalled) {
+                const resetW = Math.max(inc, Math.round((w * 0.90) / inc) * inc);
+                return {
+                    badge: `↻ Plateau Check`,
+                    badgeClass: 'bg-rose-100 text-rose-800 border border-rose-300',
+                    action: 'PLATEAU',
+                    title: `3-Session Plateau at ${w} ${wtUnit} → Reset ${resetW} ${wtUnit} or Push +1 Rep`,
+                    detail: `Flat for 3 logs at ${w} ${wtUnit}. Do a crisp 1-session deload (${resetW} ${wtUnit} × ${repMax}, 3s negative) or rest +30s and push ${reps + 1} reps.`,
+                    applyVal: w,
+                    applyReps: Math.min(repMax, reps + 1)
+                };
+            }
+            if (reps < repMin) {
+                const stepDown = Math.max(inc, Math.round((w * 0.925) / inc) * inc);
+                return {
+                    badge: `↘ ${stepDown}${wtUnit}`,
+                    badgeClass: 'bg-amber-50 text-amber-800 border border-amber-200',
+                    action: 'STEP_DOWN',
+                    title: `Below Rep Floor (${reps} < ${repMin}) → Trim to ${stepDown} ${wtUnit}`,
+                    detail: `Lower slightly to ${stepDown} ${wtUnit} so all sets land cleanly inside ${repMin}–${repMax} reps.`,
+                    applyVal: stepDown,
+                    applyReps: repMin + 1
+                };
+            }
+            const nextReps = Math.min(repMax, reps + 1);
+            return {
+                badge: `→ ${w}${wtUnit} × ${nextReps}`,
+                badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
+                action: 'PUSH_REPS',
+                title: `Double Progression → Hold ${w} ${wtUnit}, Push ${nextReps} Reps`,
+                detail: `Keep ${w} ${wtUnit} until you hit ${repMax} reps at ≤${targetRir} RIR. Next push: beat ${reps} reps (${nextReps} reps, est. 1RM ${e1rm} ${wtUnit}).`,
+                applyVal: w,
+                applyReps: nextReps
+            };
+        }
+
+        function applyProgressionTarget(val, reps) {
+            const valEl = document.getElementById('log-val-input');
+            const repsEl = document.getElementById('log-reps-input');
+            if (valEl && val !== null) valEl.value = val;
+            if (repsEl && reps !== null) repsEl.value = reps;
+        }
+
         function saveStepLog(stepId) {
             const valEl = document.getElementById('log-val-input');
             const repsEl = document.getElementById('log-reps-input');
             const speedEl = document.getElementById('log-speed-input');
+            const rirEl = document.getElementById('log-rir-input');
             if (!valEl || !repsEl) return;
             const val = parseFloat(valEl.value);
             const reps = parseInt(repsEl.value, 10);
@@ -2134,12 +2264,16 @@
             const cardioType = getCardioType(stepObj);
             const mode = cardioType || 'lift';
             const speed = speedEl ? parseFloat(speedEl.value) : null;
+            const rir = rirEl ? parseFloat(rirEl.value) : null;
 
             if (!weightLogs[stepId]) weightLogs[stepId] = [];
             const today = new Date().toISOString().slice(0, 10);
             const entry = { date: today, val, reps, mode };
             if (mode === 'treadmill' && !isNaN(speed) && speed > 0) {
                 entry.speed = +speed.toFixed(1);
+            }
+            if (!cardioType && rir !== null && !isNaN(rir)) {
+                entry.rir = rir;
             }
             weightLogs[stepId].push(entry);
             if (weightLogs[stepId].length > 30) {
@@ -2167,13 +2301,15 @@
 
         function renderLogCard(step) {
             if (step.noWeightLog) {
+                const nwTitle = step.noWeightTitle || 'Mobility &amp; Posture Drill';
+                const nwBadge = step.noWeightBadge || 'Zero Weight';
                 return `
                 <div class="p-3 rounded-xl bg-teal-50/70 border border-teal-200 flex items-center justify-between gap-2">
                     <div>
-                        <div class="text-[11px] font-bold uppercase tracking-wider text-teal-800">Mobility &amp; Posture Drill</div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-teal-800">${nwTitle}</div>
                         <div class="text-xs font-semibold text-slate-800 mt-0.5">${step.sets} • ${step.equipment}</div>
                     </div>
-                    <span class="px-2 py-1 rounded-lg bg-white border border-teal-200 text-[11px] font-bold text-teal-700">Zero Weight</span>
+                    <span class="px-2 py-1 rounded-lg bg-white border border-teal-200 text-[11px] font-bold text-teal-700">${nwBadge}</span>
                 </div>`;
             }
             const logs = weightLogs[step.id] || [];
@@ -2181,8 +2317,8 @@
             const isCardio = !!cardioType;
             const isStepper = cardioType === 'stepper';
 
-            const unit = isCardio ? (isStepper ? 'Lvl' : '%') : 'lb';
-            const valLabel = isCardio ? (isStepper ? 'Level' : 'Incline %') : 'Weight (lb)';
+            const unit = isCardio ? (isStepper ? 'Lvl' : '%') : (step.perArm ? 'lb/arm' : 'lb');
+            const valLabel = isCardio ? (isStepper ? 'Level' : 'Incline %') : (step.perArm ? 'Weight / Arm (lb)' : 'Weight (lb)');
             const repsLabel = isCardio ? 'Minutes' : 'Reps';
             const stepAmt = isCardio ? 1 : 5;
 
@@ -2207,8 +2343,20 @@
                     ? `Stepper Lvl ${latestSame.val} · ${latestSame.reps}m`
                     : cardioType === 'treadmill'
                         ? `${latestSame.val}% · ${latestSame.speed || 3.0} mph · ${latestSame.reps}m`
-                        : `${latestSame.val} lb × ${latestSame.reps}`)
+                        : `${latestSame.val} ${unit} × ${latestSame.reps}`)
                 : '';
+
+            const defaultRir = latestSame?.rir !== undefined ? latestSame.rir : 2;
+            const prog = !isCardio ? computeStepProgression(step, logs) : null;
+            const progBox = prog ? `
+                <div class="p-2.5 rounded-lg bg-white/95 border border-indigo-200/80 space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Next-Session Push Coach</span>
+                        ${prog.applyVal !== null ? `<button type="button" onclick="applyProgressionTarget(${prog.applyVal}, ${prog.applyReps})" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold transition-colors">Use Target</button>` : ''}
+                    </div>
+                    <div class="text-xs font-bold text-slate-900">${prog.title}</div>
+                    <div class="text-[11px] text-slate-600 leading-snug">${prog.detail}</div>
+                </div>` : '';
 
             const inputGrid = cardioType === 'treadmill' ? `
                 <div class="grid grid-cols-12 gap-1.5 items-end">
@@ -2237,27 +2385,41 @@
                     </div>
                 </div>` : `
                 <div class="grid grid-cols-12 gap-1.5 items-end">
-                    <div class="col-span-6">
+                    <div class="col-span-5">
                         <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">${valLabel}</label>
                         <div class="flex items-center gap-1">
-                            <button type="button" onclick="adjustVal(-${stepAmt})" class="px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">-${stepAmt}</button>
+                            <button type="button" onclick="adjustVal(-${stepAmt})" class="px-1.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">-${stepAmt}</button>
                             <input id="log-val-input" type="number" step="any" inputmode="decimal" value="${defaultVal}" placeholder="${isCardio ? '6' : '0'}"
-                                class="w-full min-w-0 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
-                            <button type="button" onclick="adjustVal(${stepAmt})" class="px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">+${stepAmt}</button>
+                                class="w-full min-w-0 px-1.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
+                            <button type="button" onclick="adjustVal(${stepAmt})" class="px-1.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100">+${stepAmt}</button>
                         </div>
                     </div>
-                    <div class="col-span-3">
+                    <div class="col-span-2">
                         <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">${repsLabel}</label>
                         <input id="log-reps-input" type="number" inputmode="numeric" value="${defaultReps}"
-                            class="w-full px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
+                            class="w-full px-1 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
                     </div>
-                    <div class="col-span-3">
+                    ${!isCardio ? `<div class="col-span-2">
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">RIR</label>
+                        <select id="log-rir-input" class="w-full px-1 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900 text-center">
+                            <option value="0" ${defaultRir === 0 ? 'selected' : ''}>0</option>
+                            <option value="1" ${defaultRir === 1 ? 'selected' : ''}>1</option>
+                            <option value="2" ${defaultRir === 2 ? 'selected' : ''}>2</option>
+                            <option value="3" ${defaultRir === 3 ? 'selected' : ''}>3</option>
+                            <option value="4" ${defaultRir >= 4 ? 'selected' : ''}>4+</option>
+                        </select>
+                    </div>` : ''}
+                    <div class="${isCardio ? 'col-span-5' : 'col-span-3'}">
                         <button type="button" onclick="saveStepLog('${step.id}')"
                             class="w-full py-1.5 px-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors">Save</button>
                     </div>
                 </div>`;
 
-            const headerTitle = isStepper ? 'Stair Stepper Log' : cardioType === 'treadmill' ? 'Incline Walk &amp; Speed Log' : 'Weight &amp; Progress';
+            const headerTitle = isStepper
+                ? 'Stair Stepper Log'
+                : cardioType === 'treadmill'
+                    ? 'Incline Walk &amp; Speed Log'
+                    : (step.perArm ? 'Weight &amp; Progress • Each Arm' : 'Weight &amp; Progress');
             return `
             <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-2.5">
                 <div class="flex items-center justify-between gap-2">
@@ -2267,6 +2429,7 @@
                         ${deltaBadge}
                     </div>
                 </div>
+                ${progBox}
                 ${inputGrid}
                 ${recent.length ? `
                 <div class="pt-2 border-t border-indigo-200/70">
@@ -2640,9 +2803,9 @@
                 `, 'Glute Extension Path');
             }
 
-            // 13. Leg Extension (wed-3), Lying Curl (wed-4), Seated Curl (sun-3)
+            // 13. Leg Extension (wed-3) & Lying Curl (wed-4, sun-3)
             if (id === 'wed-3' || id === 'wed-4' || id === 'sun-3') {
-                if (id === 'wed-4') {
+                if (id === 'wed-4' || id === 'sun-3') {
                     return svgWrap(`
                         <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
                         <line x1="48" y1="96" x2="152" y2="96" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
@@ -2704,7 +2867,7 @@
                 `, isAbd ? 'Outer Glute Press Out' : 'Inner Thigh Squeeze');
             }
 
-            // 15. DB / Smith RDL (sun-1)
+            // 15. Free-Weight Dumbbell RDL (sun-1)
             if (id === 'sun-1') {
                 return svgWrap(`
                     <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
@@ -2721,28 +2884,32 @@
                     <circle cx="122" cy="96" r="4.5" fill="#10b981"/>
                     ${pill(184, 22, 'Push Hips Straight Back', '#be123c', '#fff1f2', '#fda4af')}
                     ${pill(184, 56, 'Flat Spine • ~15° Fixed Knees', '#065f46', '#ecfdf5', '#6ee7b7')}
-                    ${pill(184, 90, 'Weights Glued to Thighs/Shins', '#1e40af', '#eff6ff', '#93c5fd')}
-                `, 'Hip Hinge Mechanics');
+                    ${pill(184, 90, 'DBs Glued to Thighs/Shins', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, 'Free-Weight DB Hinge');
             }
 
-            // 16. Standing Calf Raise (sun-4)
+            // 16. Seated Calf Extension Machine (sun-4)
             if (id === 'sun-4') {
                 return svgWrap(`
                     <line x1="20" y1="138" x2="340" y2="138" stroke="#cbd5e1" stroke-width="2"/>
-                    <rect x="52" y="120" width="46" height="18" rx="3" fill="#64748b"/>
-                    <rect x="148" y="120" width="46" height="18" rx="3" fill="#64748b"/>
-                    <!-- 1. Deep Stretch Heel Drop -->
-                    <line x1="84" y1="36" x2="84" y2="116" stroke="#64748b" stroke-width="6.5" stroke-linecap="round"/>
-                    <polyline points="84,116 90,118 68,132" fill="none" stroke="#64748b" stroke-width="5.5" stroke-linecap="round"/>
-                    <text x="76" y="24" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">1. Deep 2s Pause</text>
-                    <!-- 2. High Tip-Toe Peak -->
-                    <line x1="180" y1="36" x2="180" y2="104" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round"/>
-                    <polyline points="180,104 186,118 170,100" fill="none" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round"/>
-                    <line x1="198" y1="120" x2="198" y2="96" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
-                    <text x="176" y="24" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">2. High Tip-Toe (1s)</text>
-                    ${pill(216, 48, 'Straight Knees', '#065f46', '#ecfdf5', '#6ee7b7')}
-                    ${pill(216, 82, 'Zero Bouncing', '#be123c', '#fff1f2', '#fda4af')}
-                `, 'Full Stretch → Peak Raise');
+                    <!-- Machine Seat & Horizontal Frame -->
+                    <rect x="44" y="48" width="12" height="54" rx="4" fill="#64748b"/>
+                    <rect x="44" y="96" width="46" height="10" rx="4" fill="#64748b"/>
+                    <line x1="66" y1="106" x2="66" y2="138" stroke="#475569" stroke-width="4"/>
+                    <line x1="66" y1="120" x2="152" y2="120" stroke="#475569" stroke-width="4"/>
+                    <!-- Lifter Seated Legs Straight -->
+                    <circle cx="62" cy="40" r="9" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="62" y1="50" x2="62" y2="96" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="62" y1="96" x2="146" y2="96" stroke="#1d4ed8" stroke-width="6.5" stroke-linecap="round"/>
+                    <!-- Hinged Footplate & Calf Press Motion -->
+                    <line x1="146" y1="96" x2="144" y2="74" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="150" y1="96" x2="164" y2="82" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="146" y1="68" x2="166" y2="78" stroke="#e11d48" stroke-width="2.5" marker-end="url(#arr-r)"/>
+                    <circle cx="106" cy="96" r="4" fill="#10b981"/>
+                    ${pill(178, 22, 'Legs Straight (Micro-Bend)', '#065f46', '#ecfdf5', '#6ee7b7')}
+                    ${pill(178, 56, '2s Stretch (Toes Pulled Back)', '#be123c', '#fff1f2', '#fda4af')}
+                    ${pill(178, 90, 'Push Balls of Feet • 1s Hold', '#1e40af', '#eff6ff', '#93c5fd')}
+                `, 'Seated Calf Extension');
             }
 
             // 17. Captain's Chair (sun-5)
